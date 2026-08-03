@@ -33,7 +33,7 @@ export default [
     },
     ...tseslint.configs.recommended,
     {
-        files: ["src/**/*.ts", "tests/**/*.ts", "*.config.ts", "**/*.js", "**/*.mjs"],
+        files: ["src/**/*.ts", "tests/**/*.ts", "*.config.mjs", "**/*.js", "**/*.mjs"],
         plugins: {
             custom: customCommentsPlugin,
             "no-comments": noComments

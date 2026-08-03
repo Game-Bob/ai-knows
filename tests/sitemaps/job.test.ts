@@ -12,7 +12,7 @@ describe("sitemap service", () => {
                 return `
                     <urlset>
                         <url>
-                            <loc>https://www.gamebob.dev/en</loc>
+                            <loc>https://www.gamebob.dev/en/utilities/categories/audiovisual-photography/print-quality-calculator-pixels-to-cm-dpi/</loc>
                         </url>
                     </urlset>
                 `;
@@ -46,7 +46,8 @@ describe("sitemap service", () => {
 
         expect(result.totalEntries).toBe(1);
         expect(result.outputFiles[0]).toContain("www.gamebob.dev-en-sitemap.md");
-        expect(writes.get(result.outputFiles[0] ?? "")).toContain("URL: https://www.gamebob.dev/en");
+        expect(writes.get(result.outputFiles[0] ?? "")).toContain("### Audiovisual Photography");
+        expect(writes.get(result.outputFiles[0] ?? "")).toContain("Print Quality Calculator");
         expect(logs).toContain("Downloading sitemap: https://www.gamebob.dev/sitemap-en.xml");
         expect(logs).toContain("Parsed 1 URLs");
     });

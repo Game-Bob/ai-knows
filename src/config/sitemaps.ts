@@ -1,7 +1,16 @@
-import type { SitemapSource } from "../sitemaps/types.js";
+import type { SitemapTarget } from '../extractors/sitemap/sitemap-extractor.js';
 
-export const sitemapSources: SitemapSource[] = [
+export const sitemapTargets: SitemapTarget[] = [
     {
-        url: "https://www.gamebob.dev/sitemap-en.xml"
+        domain: 'gamebob.dev',
+        language: 'en',
+        url: 'https://www.gamebob.dev/sitemap-en.xml'
+    },
+    {
+        domain: 'jjlmoya.es',
+        language: 'es',
+        url: 'https://jjlmoya.es/sitemap-index.xml'
     }
 ];
+
+export const sitemapSources = sitemapTargets;

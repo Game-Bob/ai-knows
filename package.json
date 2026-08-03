@@ -5,8 +5,9 @@
     "type": "module",
     "description": "Personal intelligence hub for extracting, normalizing, and packaging business data for AI analysis.",
     "scripts": {
-        "dev": "tsx watch src/index.ts",
-        "start": "tsx src/index.ts",
+        "dev": "tsx --env-file=.env watch src/index.ts",
+        "sync": "tsx --env-file=.env src/index.ts",
+        "start": "tsx --env-file=.env src/index.ts",
         "build": "tsc --project tsconfig.json",
         "check": "tsc --noEmit --project tsconfig.check.json",
         "lint": "eslint src/ tests/ *.config.ts --max-warnings 0",
