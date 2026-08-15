@@ -13,6 +13,8 @@
         "lint": "eslint src/ tests/ *.config.ts --max-warnings 0",
         "format": "prettier . --write",
         "test": "vitest run",
+        "discover": "npm run discover:suggest",
+        "discover:suggest": "tsx --env-file=.env src/discover.ts",
         "issues": "tsx scripts/list-utility-issues.ts",
         "generate-workspace": "tsx scripts/generate-workspace.ts",
         "verify": "npm run check && npm run lint && npm run test"
