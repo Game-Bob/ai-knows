@@ -1,0 +1,173 @@
+{
+    "folders": [
+        {
+            "name": "Command Center (ai-knows)",
+            "path": "."
+        },
+        {
+            "name": "Utils - Alcohol",
+            "path": "../jjlmoya-utils-alcohol"
+        },
+        {
+            "name": "Utils - Astronomy",
+            "path": "../jjlmoya-utils-astronomy"
+        },
+        {
+            "name": "Utils - Audiovisual",
+            "path": "../jjlmoya-utils-audiovisual"
+        },
+        {
+            "name": "Utils - Babies",
+            "path": "../jjlmoya-utils-babies"
+        },
+        {
+            "name": "Utils - Bike",
+            "path": "../jjlmoya-utils-bike"
+        },
+        {
+            "name": "Utils - Chrono",
+            "path": "../jjlmoya-utils-chrono"
+        },
+        {
+            "name": "Utils - Coffee",
+            "path": "../jjlmoya-utils-coffee"
+        },
+        {
+            "name": "Utils - Converters",
+            "path": "../jjlmoya-utils-converters"
+        },
+        {
+            "name": "Utils - Cooking",
+            "path": "../jjlmoya-utils-cooking"
+        },
+        {
+            "name": "Utils - Creative",
+            "path": "../jjlmoya-utils-creative"
+        },
+        {
+            "name": "Utils - Developer",
+            "path": "../jjlmoya-utils-developer"
+        },
+        {
+            "name": "Utils - Diy",
+            "path": "../jjlmoya-utils-diy"
+        },
+        {
+            "name": "Utils - Drones",
+            "path": "../jjlmoya-utils-drones"
+        },
+        {
+            "name": "Utils - Education",
+            "path": "../jjlmoya-utils-education"
+        },
+        {
+            "name": "Utils - Files",
+            "path": "../jjlmoya-utils-files"
+        },
+        {
+            "name": "Utils - Finance",
+            "path": "../jjlmoya-utils-finance"
+        },
+        {
+            "name": "Utils - Forensic-science",
+            "path": "../jjlmoya-utils-forensic-science"
+        },
+        {
+            "name": "Utils - Games",
+            "path": "../jjlmoya-utils-games"
+        },
+        {
+            "name": "Utils - Games-development",
+            "path": "../jjlmoya-utils-games-development"
+        },
+        {
+            "name": "Utils - Hardware",
+            "path": "../jjlmoya-utils-hardware"
+        },
+        {
+            "name": "Utils - Health",
+            "path": "../jjlmoya-utils-health"
+        },
+        {
+            "name": "Utils - Home",
+            "path": "../jjlmoya-utils-home"
+        },
+        {
+            "name": "Utils - Music",
+            "path": "../jjlmoya-utils-music"
+        },
+        {
+            "name": "Utils - Nature",
+            "path": "../jjlmoya-utils-nature"
+        },
+        {
+            "name": "Utils - Nautical",
+            "path": "../jjlmoya-utils-nautical"
+        },
+        {
+            "name": "Utils - Pets",
+            "path": "../jjlmoya-utils-pets"
+        },
+        {
+            "name": "Utils - Printing3d",
+            "path": "../jjlmoya-utils-printing3d"
+        },
+        {
+            "name": "Utils - Science",
+            "path": "../jjlmoya-utils-science"
+        },
+        {
+            "name": "Utils - Shared",
+            "path": "../jjlmoya-utils-shared"
+        },
+        {
+            "name": "Utils - Social",
+            "path": "../jjlmoya-utils-social"
+        },
+        {
+            "name": "Utils - Sports",
+            "path": "../jjlmoya-utils-sports"
+        },
+        {
+            "name": "Utils - Statistics",
+            "path": "../jjlmoya-utils-statistics"
+        },
+        {
+            "name": "Utils - Streaming",
+            "path": "../jjlmoya-utils-streaming"
+        },
+        {
+            "name": "Utils - Tabletop",
+            "path": "../jjlmoya-utils-tabletop"
+        },
+        {
+            "name": "Utils - Template",
+            "path": "../jjlmoya-utils-template"
+        },
+        {
+            "name": "Utils - Textiles",
+            "path": "../jjlmoya-utils-textiles"
+        },
+        {
+            "name": "Utils - Tools",
+            "path": "../jjlmoya-utils-tools"
+        },
+        {
+            "name": "Utils - Travel",
+            "path": "../jjlmoya-utils-travel"
+        },
+        {
+            "name": "Utils - Work",
+            "path": "../jjlmoya-utils-work"
+        },
+        {
+            "name": "JJLMoya",
+            "path": "../jjlmoya"
+        },
+        {
+            "name": "Website",
+            "path": "../website"
+        }
+    ],
+    "settings": {}
+}
