@@ -1,12 +1,11 @@
 import { ConsoleLogger } from './core/logging/console-logger.js';
 import { FileStorage } from './core/storage/file-storage.js';
 import { SitemapParser } from './extractors/sitemap/sitemap-parser.js';
-import { RedditSearchClient } from './extractors/social/clients/reddit-search.client.js';
 import { TwitterSearchClient } from './extractors/social/clients/twitter-search.client.js';
 import { SocialMatcherService } from './extractors/social/social-matcher.service.js';
 import { SocialReportFormatter } from './extractors/social/social-report-formatter.js';
 import { sitemapTargets } from './config/sitemaps.js';
-import { targetSubreddits } from './config/social-queries.js';
+import { universalCalculationIntents, allCategorySeeds } from './config/social-queries.js';
 import type { SocialPost, SocialOpportunity } from './core/contracts/social-post.interface.js';
 
 async function fetchSitemapUrls(parser: SitemapParser): Promise<string[]> {
@@ -18,31 +17,18 @@ async function fetchSitemapUrls(parser: SitemapParser): Promise<string[]> {
     return urls;
 }
 
-async function collectSocialDiscussions(
-    reddit: RedditSearchClient,
+async function collectUniversalDiscussions(
     twitter: TwitterSearchClient
 ): Promise<SocialPost[]> {
     const posts: SocialPost[] = [];
-
-    const twitterKeywords = [
-        'how to calculate',
-        'calculator for',
-        'formula for',
-        'ratio calculator',
-        'how do I calculate',
-        'drone calculator',
-        'audio calculator'
+    const queries = [
+        ...universalCalculationIntents.slice(0, 8),
+        ...allCategorySeeds.map((seed) => `calculator ${seed}`)
     ];
 
-    for (const q of twitterKeywords) {
+    for (const q of queries) {
         const twPosts = await twitter.searchTweets(q);
         posts.push(...twPosts);
-        await new Promise((r) => setTimeout(r, 120));
-    }
-
-    for (const sub of targetSubreddits.slice(0, 8)) {
-        const subPosts = await reddit.searchSubreddit(sub, 'calculator');
-        posts.push(...subPosts);
         await new Promise((r) => setTimeout(r, 100));
     }
 
@@ -54,17 +40,17 @@ async function main(): Promise<void> {
     const storage = new FileStorage();
     const sitemapParser = new SitemapParser();
 
-    logger.info('Fetching sitemaps for social matching...');
+    logger.info('Fetching sitemaps across all 38 categories (500+ tools)...');
     const activeUrls = await fetchSitemapUrls(sitemapParser);
+    logger.info(`Indexed ${activeUrls.length} total tools in active catalog.`);
 
-    const redditClient = new RedditSearchClient();
     const twitterClient = new TwitterSearchClient();
     const matcher = new SocialMatcherService(activeUrls);
     const formatter = new SocialReportFormatter();
 
-    logger.info('Listening to active discussions on Twitter and Reddit (Past Month)...');
-    const posts = await collectSocialDiscussions(redditClient, twitterClient);
-    logger.info(`Collected ${posts.length} discussions. Analyzing opportunities...`);
+    logger.info('Harvesting live calculation queries across all verticals on X/Twitter...');
+    const posts = await collectUniversalDiscussions(twitterClient);
+    logger.info(`Collected ${posts.length} discussions across all niches. Matching against full catalog...`);
 
     const opportunities: SocialOpportunity[] = posts.map((p) => matcher.matchPost(p));
 
