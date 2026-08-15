@@ -1,5 +1,23 @@
 import type { SocialPost } from '../../../core/contracts/social-post.interface.js';
 
+interface PullpushItem {
+    id: string;
+    author: string;
+    title: string;
+    selftext?: string;
+    permalink?: string;
+    full_link?: string;
+    created_utc?: number;
+    score?: number;
+    num_comments?: number;
+    over_18?: boolean;
+    subreddit?: string;
+}
+
+interface PullpushResponse {
+    data?: PullpushItem[];
+}
+
 export class RedditSearchClient {
     private readonly timeoutMs: number;
 
@@ -8,21 +26,17 @@ export class RedditSearchClient {
     }
 
     async searchSubreddit(subreddit: string, query: string): Promise<SocialPost[]> {
-        const queryUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:reddit.com/r/${subreddit} ${query}`)}&num=8&hl=en`;
-        return this.fetchFromGoogle(queryUrl);
+        const url = `https://api.pullpush.io/reddit/search/submission/?subreddit=${encodeURIComponent(subreddit)}&q=${encodeURIComponent(query)}&size=10`;
+        return this.fetchFromPullpush(url, subreddit);
     }
 
-    async searchGlobal(query: string): Promise<SocialPost[]> {
-        const queryUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:reddit.com ${query}`)}&num=8&hl=en`;
-        return this.fetchFromGoogle(queryUrl);
-    }
-
-    private async fetchFromGoogle(queryUrl: string): Promise<SocialPost[]> {
+    private async fetchFromPullpush(url: string, targetSub: string): Promise<SocialPost[]> {
         try {
-            const response = await fetch(queryUrl, {
+            const response = await fetch(url, {
                 signal: AbortSignal.timeout(this.timeoutMs),
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'application/json'
                 }
             });
 
@@ -30,54 +44,27 @@ export class RedditSearchClient {
                 return [];
             }
 
-            const html = await response.text();
-            return this.parseGoogleResults(html);
+            const json = (await response.json()) as PullpushResponse;
+            return this.parseItems(json.data ?? [], targetSub);
         } catch {
             return [];
         }
     }
 
-    private parseGoogleResults(html: string): SocialPost[] {
-        const posts: SocialPost[] = [];
-        const linkRegex = /<a[^>]*href="\/url\?q=([^"&]*)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
-        let match: RegExpExecArray | null;
-
-        while ((match = linkRegex.exec(html)) !== null && posts.length < 8) {
-            const rawUrl = decodeURIComponent(match[1] ?? '');
-            const rawTitle = this.cleanHtml(match[2] ?? '');
-
-            if (rawUrl.includes('reddit.com/r/') && rawTitle.length > 5) {
-                posts.push(this.buildPost(rawUrl, rawTitle));
-            }
-        }
-
-        return posts;
-    }
-
-    private buildPost(url: string, title: string): SocialPost {
-        const subMatch = url.match(/reddit\.com\/r\/([^/]+)/);
-        const author = subMatch ? `r/${subMatch[1]}` : 'r/reddit';
-
-        return {
-            id: `reddit-${url.replace(/[^a-z0-9]/gi, '-').slice(-30)}`,
+    private parseItems(items: PullpushItem[], targetSub: string): SocialPost[] {
+        const filtered = items.filter((item) => !item.over_18 && item.title && item.title.length > 15);
+        return filtered.map((item) => ({
+            id: `reddit-${item.id}`,
             platform: 'reddit',
-            author,
-            title: title.slice(0, 100),
-            content: title,
-            url,
-            createdAt: new Date().toISOString(),
-            engagement: { score: 0, comments: 0 }
-        };
-    }
-
-    private cleanHtml(text: string): string {
-        return text
-            .replace(/<[^>]*>/g, '')
-            .replace(/&quot;/g, '"')
-            .replace(/&amp;/g, '&')
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&#x27;/g, "'")
-            .trim();
+            author: `u/${item.author}`,
+            title: `[r/${item.subreddit || targetSub}] ${item.title}`,
+            content: item.selftext || item.title,
+            url: item.full_link || (item.permalink ? `https://reddit.com${item.permalink}` : `https://reddit.com/comments/${item.id}`),
+            createdAt: item.created_utc ? new Date(item.created_utc * 1000).toISOString() : new Date().toISOString(),
+            engagement: {
+                score: item.score ?? 0,
+                comments: item.num_comments ?? 0
+            }
+        }));
     }
 }

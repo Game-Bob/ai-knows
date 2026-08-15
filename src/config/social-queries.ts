@@ -1,29 +1,32 @@
 export const socialIntentPatterns: string[] = [
+    'calculator for',
     'how to calculate',
     'is there a calculator for',
     'is there a tool to',
     'looking for a calculator',
-    'anyone know a tool for',
     'formula to calculate',
-    'tired of calculating manually',
-    'como calcular',
-    'existe alguna calculadora para',
-    'herramienta para calcular'
+    'ratio calculator',
+    'estimator for'
 ];
 
 export const targetSubreddits: string[] = [
     'fpv',
     'drones',
+    'Multicopter',
     'Coffee',
     'espresso',
-    'audiophile',
+    'pourover',
     'AudioEngineering',
+    'audiophile',
     'gamedev',
+    'unity_tutorials',
+    'godot',
     '3Dprinting',
+    'resinprinting',
     'cycling',
-    'chemistry',
-    'forensics',
+    'bikewrench',
     'AskElectronics',
+    'forensics',
     'webdev',
-    'SideProject'
+    'woodworking'
 ];

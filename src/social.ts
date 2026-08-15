@@ -6,7 +6,7 @@ import { TwitterSearchClient } from './extractors/social/clients/twitter-search.
 import { SocialMatcherService } from './extractors/social/social-matcher.service.js';
 import { SocialReportFormatter } from './extractors/social/social-report-formatter.js';
 import { sitemapTargets } from './config/sitemaps.js';
-import { socialIntentPatterns, targetSubreddits } from './config/social-queries.js';
+import { targetSubreddits } from './config/social-queries.js';
 import type { SocialPost, SocialOpportunity } from './core/contracts/social-post.interface.js';
 
 async function fetchSitemapUrls(parser: SitemapParser): Promise<string[]> {
@@ -18,24 +18,23 @@ async function fetchSitemapUrls(parser: SitemapParser): Promise<string[]> {
     return urls;
 }
 
-async function collectSocialPosts(
+async function collectTargetedPosts(
     reddit: RedditSearchClient,
     twitter: TwitterSearchClient
 ): Promise<SocialPost[]> {
     const posts: SocialPost[] = [];
 
-    for (const query of socialIntentPatterns.slice(0, 3)) {
-        const globalReddit = await reddit.searchGlobal(query);
-        posts.push(...globalReddit);
-        const twitterPosts = await twitter.searchTweets(query);
-        posts.push(...twitterPosts);
-        await new Promise((r) => setTimeout(r, 100));
+    for (const sub of targetSubreddits.slice(0, 10)) {
+        const subPosts = await reddit.searchSubreddit(sub, 'calculator');
+        posts.push(...subPosts);
+        await new Promise((r) => setTimeout(r, 120));
     }
 
-    for (const sub of targetSubreddits.slice(0, 6)) {
-        const subPosts = await reddit.searchSubreddit(sub, 'calculate');
-        posts.push(...subPosts);
-        await new Promise((r) => setTimeout(r, 100));
+    const twitterKeywords = ['drone battery calculator', 'espresso ratio calculator', 'audio delay calculator'];
+    for (const q of twitterKeywords) {
+        const twPosts = await twitter.searchTweets(q);
+        posts.push(...twPosts);
+        await new Promise((r) => setTimeout(r, 150));
     }
 
     return posts;
@@ -54,15 +53,15 @@ async function main(): Promise<void> {
     const matcher = new SocialMatcherService(activeUrls);
     const formatter = new SocialReportFormatter();
 
-    logger.info('Listening to live technical discussions on Twitter and Reddit...');
-    const posts = await collectSocialPosts(redditClient, twitterClient);
-    logger.info(`Collected ${posts.length} live discussions. Matching against your tools...`);
+    logger.info('Listening to targeted technical subreddits and X discussions...');
+    const posts = await collectTargetedPosts(redditClient, twitterClient);
+    logger.info(`Collected ${posts.length} clean technical posts. Matching against your tools...`);
 
     const opportunities: SocialOpportunity[] = posts.map((p) => matcher.matchPost(p));
     const content = formatter.formatMarkdown(opportunities);
 
     await storage.write('data/notebooklm/social-opportunities.md', content);
-    logger.info('Social live report generated in data/notebooklm/social-opportunities.md');
+    logger.info('Clean social report generated in data/notebooklm/social-opportunities.md');
 }
 
 main().catch((err) => {

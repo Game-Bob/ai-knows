@@ -8,7 +8,7 @@ export class TwitterSearchClient {
     }
 
     async searchTweets(intentQuery: string): Promise<SocialPost[]> {
-        const queryUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:x.com ${intentQuery}`)}&num=10&hl=en`;
+        const queryUrl = `https://search.yahoo.com/search?p=${encodeURIComponent(`site:x.com "${intentQuery}"`)}`;
 
         try {
             const response = await fetch(queryUrl, {
@@ -23,27 +23,36 @@ export class TwitterSearchClient {
             }
 
             const html = await response.text();
-            return this.parseGoogleResults(html);
+            return this.parseYahooResults(html);
         } catch {
             return [];
         }
     }
 
-    private parseGoogleResults(html: string): SocialPost[] {
+    private parseYahooResults(html: string): SocialPost[] {
         const posts: SocialPost[] = [];
-        const linkRegex = /<a[^>]*href="\/url\?q=([^"&]*)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
+        const regex = /<a[^>]*href="([^"]*RU=([^/&"]*)[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+        const seen = new Set<string>();
         let match: RegExpExecArray | null;
 
-        while ((match = linkRegex.exec(html)) !== null && posts.length < 8) {
-            const rawUrl = decodeURIComponent(match[1] ?? '');
-            const rawTitle = this.cleanHtml(match[2] ?? '');
+        while ((match = regex.exec(html)) !== null && posts.length < 10) {
+            const targetUrl = decodeURIComponent(match[2] ?? '');
+            const rawTitle = this.cleanHtml(match[3] ?? '');
 
-            if ((rawUrl.includes('x.com/') || rawUrl.includes('twitter.com/')) && rawTitle.length > 5) {
-                posts.push(this.buildPost(rawUrl, rawTitle));
+            if (this.isValidTweet(targetUrl, rawTitle, seen)) {
+                seen.add(targetUrl);
+                posts.push(this.buildPost(targetUrl, rawTitle));
             }
         }
 
         return posts;
+    }
+
+    private isValidTweet(url: string, title: string, seen: Set<string>): boolean {
+        return (url.includes('x.com/') || url.includes('twitter.com/')) &&
+            !url.includes('/search') &&
+            title.length > 10 &&
+            !seen.has(url);
     }
 
     private buildPost(url: string, title: string): SocialPost {
@@ -54,7 +63,7 @@ export class TwitterSearchClient {
             id: `twitter-${url.replace(/[^a-z0-9]/gi, '-').slice(-30)}`,
             platform: 'twitter',
             author,
-            title: title.slice(0, 100),
+            title: title.slice(0, 120),
             content: title,
             url,
             createdAt: new Date().toISOString(),
@@ -70,6 +79,7 @@ export class TwitterSearchClient {
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .replace(/&#x27;/g, "'")
+            .replace(/^x\.comhttps?:\/\/[^\s]+/i, '')
             .trim();
     }
 }

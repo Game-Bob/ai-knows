@@ -16,7 +16,10 @@ export class SocialMatcherService {
         'how', 'many', 'what', 'where', 'when', 'online', 'calculator',
         'calculate', 'test', 'free', 'categories', 'tools', 'with', 'your',
         'from', 'that', 'this', 'have', 'does', 'like', 'just', 'more',
-        'about', 'into', 'some', 'could', 'would', 'should', 'here', 'room'
+        'about', 'into', 'some', 'could', 'would', 'should', 'here', 'room',
+        'help', 'daily', 'weekly', 'megathread', 'survey', 'deal', 'deals',
+        'body', 'three', 'problem', 'time', 'story', 'love', 'post', 'work',
+        'history', 'best', 'good', 'need', 'using', 'between', 'cause'
     ]);
 
     constructor(sitemapUrls: string[]) {
@@ -51,7 +54,7 @@ export class SocialMatcherService {
         let highestMatches = 0;
 
         for (const tool of this.tools) {
-            if (tool.tokens.size === 0) continue;
+            if (tool.tokens.size < 2) continue;
             let matches = 0;
             for (const token of tool.tokens) {
                 if (postTokens.has(token)) {
@@ -60,7 +63,7 @@ export class SocialMatcherService {
             }
 
             const ratio = matches / tool.tokens.size;
-            if (matches >= 2 && ratio >= 0.4 && matches > highestMatches) {
+            if (matches >= 2 && ratio >= 0.65 && matches > highestMatches) {
                 highestMatches = matches;
                 bestTool = tool;
             }
@@ -83,12 +86,10 @@ export class SocialMatcherService {
             const slug = this.extractSlug(url);
             if (slug.length > 3) {
                 const words = slug.replace(/-/g, ' ');
-                list.push({
-                    title: words,
-                    slug,
-                    url,
-                    tokens: this.tokenize(words)
-                });
+                const tokens = this.tokenize(words);
+                if (tokens.size >= 2) {
+                    list.push({ title: words, slug, url, tokens });
+                }
             }
         }
         return list;
@@ -112,7 +113,7 @@ export class SocialMatcherService {
             .toLowerCase()
             .replace(/[^a-z0-9\s]/g, ' ')
             .split(/\s+/)
-            .filter((w) => w.length > 2 && !this.stopWords.has(w));
+            .filter((w) => w.length > 3 && !this.stopWords.has(w));
         return new Set(words);
     }
 }
