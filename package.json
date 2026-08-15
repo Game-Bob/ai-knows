@@ -16,6 +16,7 @@
         "discover": "npm run discover:suggest",
         "discover:suggest": "tsx --env-file=.env src/discover.ts",
         "discover:verticals": "tsx --env-file=.env src/discover-verticals.ts",
+        "social": "tsx --env-file=.env src/social.ts",
         "issues": "tsx scripts/list-utility-issues.ts",
         "generate-workspace": "tsx scripts/generate-workspace.ts",
         "verify": "npm run check && npm run lint && npm run test"
