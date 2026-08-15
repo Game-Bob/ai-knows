@@ -8,7 +8,7 @@ export class TwitterSearchClient {
     }
 
     async searchTweets(intentQuery: string): Promise<SocialPost[]> {
-        const queryUrl = `https://search.yahoo.com/search?p=${encodeURIComponent(`site:x.com "${intentQuery}"`)}`;
+        const queryUrl = `https://search.yahoo.com/search?p=${encodeURIComponent(`site:x.com ${intentQuery}`)}&btf=m`;
 
         try {
             const response = await fetch(queryUrl, {
@@ -80,6 +80,7 @@ export class TwitterSearchClient {
             .replace(/&gt;/g, '>')
             .replace(/&#x27;/g, "'")
             .replace(/^x\.comhttps?:\/\/[^\s]+/i, '')
+            .replace(/^[›\s]+[a-zA-Z0-9_]+\s+[›\s]+(?:status|article)\s*/i, '')
             .trim();
     }
 }

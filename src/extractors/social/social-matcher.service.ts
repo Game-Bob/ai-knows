@@ -13,13 +13,10 @@ export interface IndexedSitemapTool {
 export class SocialMatcherService {
     private readonly tools: IndexedSitemapTool[];
     private readonly stopWords = new Set([
-        'how', 'many', 'what', 'where', 'when', 'online', 'calculator',
-        'calculate', 'test', 'free', 'categories', 'tools', 'with', 'your',
-        'from', 'that', 'this', 'have', 'does', 'like', 'just', 'more',
-        'about', 'into', 'some', 'could', 'would', 'should', 'here', 'room',
-        'help', 'daily', 'weekly', 'megathread', 'survey', 'deal', 'deals',
-        'body', 'three', 'problem', 'time', 'story', 'love', 'post', 'work',
-        'history', 'best', 'good', 'need', 'using', 'between', 'cause'
+        'what', 'where', 'when', 'online', 'free', 'categories', 'tools',
+        'with', 'your', 'from', 'that', 'this', 'have', 'does', 'like',
+        'just', 'more', 'about', 'into', 'some', 'could', 'would', 'should',
+        'here', 'help', 'daily', 'weekly', 'megathread', 'survey', 'deal'
     ]);
 
     constructor(sitemapUrls: string[]) {
@@ -51,10 +48,9 @@ export class SocialMatcherService {
 
     private findBestMatch(postTokens: Set<string>): IndexedSitemapTool | null {
         let bestTool: IndexedSitemapTool | null = null;
-        let highestMatches = 0;
+        let highestScore = 0;
 
         for (const tool of this.tools) {
-            if (tool.tokens.size < 2) continue;
             let matches = 0;
             for (const token of tool.tokens) {
                 if (postTokens.has(token)) {
@@ -62,22 +58,21 @@ export class SocialMatcherService {
                 }
             }
 
-            const ratio = matches / tool.tokens.size;
-            if (matches >= 2 && ratio >= 0.65 && matches > highestMatches) {
-                highestMatches = matches;
+            if (matches >= 2 && matches > highestScore) {
+                highestScore = matches;
                 bestTool = tool;
             }
         }
 
-        return bestTool;
+        return highestScore >= 2 ? bestTool : null;
     }
 
     private craftReply(post: SocialPost, tool: IndexedSitemapTool): string {
         const isSpanish = /[áéíóúñ¿¡]|\b(como|calcular|para|donde|hola)\b/i.test(post.content);
         if (isSpanish) {
-            return `Hola ${post.author}, cree una herramienta web gratuita que calcula exactamente esto paso a paso: ${tool.url} (sin registros ni anuncios). Espero que te sea util!`;
+            return `Hola ${post.author}, cree una herramienta web interactiva y gratuita que calcula exactamente esto: ${tool.url} (sin registros ni anuncios). Espero que te sea util!`;
         }
-        return `Hey ${post.author}, I built a free interactive tool that calculates this exact formula based on your inputs: ${tool.url} - Hope it helps you out!`;
+        return `Hey ${post.author}, I built a free interactive tool that calculates this: ${tool.url} - Hope it helps!`;
     }
 
     private indexTools(urls: string[]): IndexedSitemapTool[] {
@@ -113,7 +108,7 @@ export class SocialMatcherService {
             .toLowerCase()
             .replace(/[^a-z0-9\s]/g, ' ')
             .split(/\s+/)
-            .filter((w) => w.length > 3 && !this.stopWords.has(w));
+            .filter((w) => w.length > 2 && !this.stopWords.has(w));
         return new Set(words);
     }
 }

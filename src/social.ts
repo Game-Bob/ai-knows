@@ -18,23 +18,32 @@ async function fetchSitemapUrls(parser: SitemapParser): Promise<string[]> {
     return urls;
 }
 
-async function collectTargetedPosts(
+async function collectSocialDiscussions(
     reddit: RedditSearchClient,
     twitter: TwitterSearchClient
 ): Promise<SocialPost[]> {
     const posts: SocialPost[] = [];
 
-    for (const sub of targetSubreddits.slice(0, 10)) {
-        const subPosts = await reddit.searchSubreddit(sub, 'calculator');
-        posts.push(...subPosts);
-        await new Promise((r) => setTimeout(r, 120));
-    }
+    const twitterKeywords = [
+        'how to calculate',
+        'calculator for',
+        'formula for',
+        'ratio calculator',
+        'how do I calculate',
+        'drone calculator',
+        'audio calculator'
+    ];
 
-    const twitterKeywords = ['drone battery calculator', 'espresso ratio calculator', 'audio delay calculator'];
     for (const q of twitterKeywords) {
         const twPosts = await twitter.searchTweets(q);
         posts.push(...twPosts);
-        await new Promise((r) => setTimeout(r, 150));
+        await new Promise((r) => setTimeout(r, 120));
+    }
+
+    for (const sub of targetSubreddits.slice(0, 8)) {
+        const subPosts = await reddit.searchSubreddit(sub, 'calculator');
+        posts.push(...subPosts);
+        await new Promise((r) => setTimeout(r, 100));
     }
 
     return posts;
@@ -53,15 +62,20 @@ async function main(): Promise<void> {
     const matcher = new SocialMatcherService(activeUrls);
     const formatter = new SocialReportFormatter();
 
-    logger.info('Listening to targeted technical subreddits and X discussions...');
-    const posts = await collectTargetedPosts(redditClient, twitterClient);
-    logger.info(`Collected ${posts.length} clean technical posts. Matching against your tools...`);
+    logger.info('Listening to active discussions on Twitter and Reddit (Past Month)...');
+    const posts = await collectSocialDiscussions(redditClient, twitterClient);
+    logger.info(`Collected ${posts.length} discussions. Analyzing opportunities...`);
 
     const opportunities: SocialOpportunity[] = posts.map((p) => matcher.matchPost(p));
-    const content = formatter.formatMarkdown(opportunities);
 
-    await storage.write('data/notebooklm/social-opportunities.md', content);
-    logger.info('Clean social report generated in data/notebooklm/social-opportunities.md');
+    const trafficReport = formatter.formatTrafficReport(opportunities);
+    const requestsReport = formatter.formatRequestsReport(opportunities);
+
+    await storage.write('data/notebooklm/social-traffic-outreach.md', trafficReport);
+    await storage.write('data/notebooklm/social-tool-requests.md', requestsReport);
+
+    logger.info('Generated: data/notebooklm/social-traffic-outreach.md');
+    logger.info('Generated: data/notebooklm/social-tool-requests.md');
 }
 
 main().catch((err) => {

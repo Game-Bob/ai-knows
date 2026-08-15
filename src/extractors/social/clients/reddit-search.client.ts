@@ -53,6 +53,7 @@ export class RedditSearchClient {
 
     private parseItems(items: PullpushItem[], targetSub: string): SocialPost[] {
         const filtered = items.filter((item) => !item.over_18 && item.title && item.title.length > 15);
+
         return filtered.map((item) => ({
             id: `reddit-${item.id}`,
             platform: 'reddit',
