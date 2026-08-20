@@ -1,0 +1,427 @@
+<div id="social-image-editor">
+    <style>
+        #social-image-editor {
+            --ink: #0b1930;
+            --muted: #718096;
+            --line: #d7dde5;
+            --surface: #ffffff;
+            --soft: #f4f6f8;
+            --accent: #c45a2f;
+            min-height: 100vh;
+            background: #eef1f4;
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        }
+
+        #social-image-editor * { box-sizing: border-box; }
+        #social-image-editor .editor-shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+        #social-image-editor .controls { padding: 22px; background: var(--surface); border-right: 1px solid var(--line); overflow: auto; }
+        #social-image-editor h1 { margin: 0 0 5px; font-size: 20px; letter-spacing: -.03em; }
+        #social-image-editor .intro { margin: 0 0 22px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+        #social-image-editor .group { padding: 16px 0; border-top: 1px solid var(--line); }
+        #social-image-editor .group:first-of-type { border-top: 0; padding-top: 0; }
+        #social-image-editor label { display: block; margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+        #social-image-editor input[type="text"],
+        #social-image-editor select,
+        #social-image-editor input[type="file"] { width: 100%; margin-bottom: 12px; }
+        #social-image-editor input[type="text"], #social-image-editor select { height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); }
+        #social-image-editor input[type="file"] { font-size: 11px; }
+        #social-image-editor .color-row { display: grid; grid-template-columns: 1fr 38px; gap: 8px; align-items: center; margin-bottom: 10px; }
+        #social-image-editor input[type="color"] { width: 38px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 7px; background: white; }
+        #social-image-editor .layer { display: grid; grid-template-columns: 24px 1fr 74px; gap: 7px; align-items: center; margin: 8px 0; }
+        #social-image-editor .layer input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
+        #social-image-editor .layer span { font-size: 12px; }
+        #social-image-editor .layer input[type="range"] { width: 74px; }
+        #social-image-editor .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+        #social-image-editor button { min-height: 35px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); cursor: pointer; font-weight: 700; }
+        #social-image-editor button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+        #social-image-editor .workspace { display: grid; place-items: center; min-width: 0; padding: 34px; }
+        #social-image-editor .canvas-wrap { width: min(100%, 1100px); }
+        #social-image-editor .canvas-head { display: flex; justify-content: space-between; gap: 14px; margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+        #social-image-editor canvas { display: block; width: 100%; height: auto; background: #dfe5eb; box-shadow: 0 18px 45px rgba(11, 25, 48, .16); cursor: grab; touch-action: none; }
+        #social-image-editor canvas.is-dragging { cursor: grabbing; }
+        #social-image-editor .hint { margin-top: 11px; color: var(--muted); font-size: 12px; }
+        @media (max-width: 800px) {
+            #social-image-editor .editor-shell { grid-template-columns: 1fr; }
+            #social-image-editor .controls { border-right: 0; border-bottom: 1px solid var(--line); }
+            #social-image-editor .workspace { padding: 18px; }
+        }
+    </style>
+
+    <div class="editor-shell">
+        <aside class="controls">
+            <h1>Compositor de imágenes</h1>
+            <p class="intro">Mueve las capas directamente sobre el lienzo. Cambia los assets y descarga la composición cuando esté lista.</p>
+
+            <section class="group">
+                <label for="production-url">URL de producción</label>
+                <input id="production-url" type="text" placeholder="https://www.jjlmoya.es/utilidades/.../">
+                <button id="load-production" class="primary" type="button">Cargar desde producción</button>
+                <p id="load-status" class="hint"></p>
+            </section>
+
+            <section class="group">
+                <label for="format">Formato</label>
+                <select id="format">
+                    <option value="panoramic">Panorámica · 1536 × 1024</option>
+                    <option value="instagram">Instagram · 1080 × 1350</option>
+                    <option value="square">Cuadrada · 1080 × 1080</option>
+                    <option value="story">Story · 1080 × 1920</option>
+                </select>
+                <label for="title">Título</label>
+                <input id="title" type="text" value="Calculadora de Alcance del Telescopio">
+                <label for="title-style">Diseño del título</label>
+                <select id="title-style">
+                    <option value="paper">Papel editorial</option>
+                    <option value="ribbon">Cinta desplegada</option>
+                    <option value="ink">Tinta libre</option>
+                    <option value="poster">Cartel nocturno</option>
+                    <option value="ticket">Billete recortado</option>
+                    <option value="marker">Subrayado matérico</option>
+                    <option value="split">Bloque partido</option>
+                    <option value="capsule">Cápsula minimal</option>
+                    <option value="corner">Esquina editorial</option>
+                    <option value="vertical">Lomo vertical</option>
+                </select>
+                <label for="brand-domain">Marca</label>
+                <select id="brand-domain">
+                    <option value="jjlmoya.es">jjlmoya.es</option>
+                    <option value="gamebob.dev">GameBob.dev</option>
+                </select>
+            </section>
+
+            <section class="group">
+                <label for="background-file">Fondo</label>
+                <input id="background-file" type="file" accept="image/*">
+                <label for="tool-file">Herramienta</label>
+                <input id="tool-file" type="file" accept="image/*">
+                <label for="brand-file">Logo</label>
+                <input id="brand-file" type="file" accept="image/*">
+                <label for="mascot-file">Gatita</label>
+                <input id="mascot-file" type="file" accept="image/*">
+            </section>
+
+            <section class="group">
+                <label>Capas</label>
+                <div class="layer"><input id="background-visible" type="checkbox" checked><span>Fondo</span><input id="background-scale" type="range" min="50" max="160" value="100"></div>
+                <div class="layer"><input id="tool-visible" type="checkbox" checked><span>Herramienta</span><input id="tool-scale" type="range" min="50" max="140" value="100"></div>
+                <div class="layer"><input id="brand-visible" type="checkbox" checked><span>Logo</span><input id="brand-scale" type="range" min="50" max="180" value="100"></div>
+                <div class="layer"><input id="mascot-visible" type="checkbox" checked><span>Gatita</span><input id="mascot-scale" type="range" min="50" max="200" value="100"></div>
+                <div class="layer"><input id="title-visible" type="checkbox" checked><span>Título</span><input id="title-scale" type="range" min="70" max="150" value="100"></div>
+            </section>
+
+            <section class="group">
+                <label>Estilo común</label>
+                <div class="color-row"><span>Fondo del título</span><input id="subtitle-fill" type="color" value="#f7ebd7"></div>
+                <div class="color-row"><span>Texto del título</span><input id="subtitle-text" type="color" value="#08182b"></div>
+                <div class="color-row"><span>Acento</span><input id="accent" type="color" value="#c45a2f"></div>
+                <div class="color-row"><span>Marco herramienta</span><input id="panel-border" type="color" value="#f7ebd7"></div>
+            </section>
+
+            <div class="actions">
+                <button id="reset">Restablecer</button>
+                <button id="download" class="primary">Descargar PNG</button>
+            </div>
+        </aside>
+
+        <main class="workspace">
+            <div class="canvas-wrap">
+                <div class="canvas-head"><span id="size-label">1536 × 1024</span><span id="active-label">Capa activa: herramienta</span></div>
+                <canvas id="canvas" width="1536" height="1024" aria-label="Lienzo editable de composición social"></canvas>
+                <p class="hint">Arrastra cualquier elemento para recolocarlo. Usa el control de su capa para cambiar el tamaño.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            const root = document.getElementById('social-image-editor');
+            const canvas = root.querySelector('#canvas');
+            const context = canvas.getContext('2d');
+            const presets = {
+                panoramic: { width: 1536, height: 1024, tool: { x: 430, y: 170, width: 1067, height: 667 }, title: { x: 560, y: 82, width: 620, height: 112 }, brand: { x: 1288, y: 858, width: 178, height: 64 }, mascot: { x: 1170, y: 830, width: 104, height: 104 } },
+                instagram: { width: 1080, height: 1350, tool: { x: 45, y: 390, width: 990, height: 619 }, title: { x: 45, y: 150, width: 990, height: 130 }, brand: { x: 790, y: 1080, width: 220, height: 80 }, mascot: { x: 650, y: 1060, width: 120, height: 120 } },
+                square: { width: 1080, height: 1080, tool: { x: 45, y: 310, width: 990, height: 619 }, title: { x: 45, y: 110, width: 990, height: 130 }, brand: { x: 790, y: 965, width: 220, height: 80 }, mascot: { x: 650, y: 945, width: 120, height: 120 } },
+                story: { width: 1080, height: 1920, tool: { x: 40, y: 760, width: 1000, height: 625 }, title: { x: 40, y: 250, width: 1000, height: 140 }, brand: { x: 760, y: 1480, width: 250, height: 90 }, mascot: { x: 610, y: 1450, width: 135, height: 135 } }
+            };
+            const storageKey = 'social-image-editor-state-v1';
+            const state = { format: 'panoramic', active: 'tool', brandDomain: 'jjlmoya.es', title: 'Calculadora de Alcance del Telescopio', titleStyle: 'paper', visible: { background: true, tool: true, brand: true, mascot: true, title: true }, scale: { background: 1, tool: 1, brand: 1, mascot: 1, title: 1 }, colors: { subtitleFill: '#f7ebd7', subtitleText: '#08182b', accent: '#c45a2f', panelBorder: '#f7ebd7' } };
+            const positions = {};
+            const imageSources = {};
+            const imageFiles = { background: 'background-file', tool: 'tool-file', brand: 'brand-file', mascot: 'mascot-file' };
+            const imageElements = {};
+            const savedState = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch { return null; } })();
+
+            const loadImage = (key, source) => new Promise((resolve) => {
+                const image = new Image();
+                image.onload = () => { imageElements[key] = image; imageSources[key] = source; resolve(); };
+                image.src = source;
+            });
+
+            const loadDefault = async () => {
+                await Promise.all([
+                    loadImage('brand', '/assets/social/jjlmoya-overlay.png'),
+                    loadImage('mascot', '/assets/social/pixel-cat.png')
+                ]);
+                await restoreSavedState();
+            };
+
+            const applyPreset = () => {
+                const preset = presets[state.format];
+                canvas.width = preset.width;
+                canvas.height = preset.height;
+                positions.tool = { ...preset.tool };
+                positions.title = { ...preset.title };
+                positions.brand = { ...preset.brand };
+                positions.mascot = { ...preset.mascot };
+                positions.background = { x: 0, y: 0, width: preset.width, height: preset.height };
+                root.querySelector('#size-label').textContent = `${preset.width} × ${preset.height}`;
+                draw();
+            };
+
+            const persist = () => {
+                try {
+                    const persistedImages = Object.fromEntries(Object.entries(imageSources).filter(([, source]) => source.startsWith('/') || source.length < 200000));
+                    localStorage.setItem(storageKey, JSON.stringify({ format: state.format, brandDomain: state.brandDomain, title: state.title, titleStyle: state.titleStyle, visible: state.visible, scale: state.scale, colors: state.colors, positions, imageSources: persistedImages }));
+                } catch { }
+            };
+
+            const syncControls = () => {
+                root.querySelector('#format').value = state.format;
+                root.querySelector('#brand-domain').value = state.brandDomain;
+                root.querySelector('#title').value = state.title;
+                root.querySelector('#title-style').value = state.titleStyle;
+                Object.keys(state.visible).forEach((key) => { root.querySelector(`#${key}-visible`).checked = state.visible[key]; });
+                Object.keys(state.scale).forEach((key) => { root.querySelector(`#${key}-scale`).value = String(Math.round(state.scale[key] * 100)); });
+                const colorInputs = { subtitleFill: 'subtitle-fill', subtitleText: 'subtitle-text', accent: 'accent', panelBorder: 'panel-border' };
+                Object.entries(colorInputs).forEach(([key, id]) => { root.querySelector(`#${id}`).value = state.colors[key]; });
+            };
+
+            const restoreSavedState = async () => {
+                if (!savedState) { applyPreset(); return; }
+                if (presets[savedState.format]) state.format = savedState.format;
+                if (savedState.brandDomain === 'jjlmoya.es' || savedState.brandDomain === 'gamebob.dev') state.brandDomain = savedState.brandDomain;
+                if (typeof savedState.title === 'string') state.title = savedState.title;
+                if (typeof savedState.titleStyle === 'string') state.titleStyle = savedState.titleStyle;
+                Object.assign(state.visible, savedState.visible || {});
+                Object.assign(state.scale, savedState.scale || {});
+                Object.assign(state.colors, savedState.colors || {});
+                applyPreset();
+                Object.keys(positions).forEach((key) => { if (savedState.positions?.[key]) Object.assign(positions[key], savedState.positions[key]); });
+                const savedImages = savedState.imageSources || {};
+                await Promise.all(Object.entries(savedImages).filter(([, source]) => typeof source === 'string' && (source.startsWith('/') || source.startsWith('data:image/'))).map(([key, source]) => loadImage(key, source)));
+                syncControls();
+                draw();
+            };
+
+            const drawCover = (image, box) => {
+                const ratio = Math.max(box.width / image.width, box.height / image.height);
+                const width = image.width * ratio;
+                const height = image.height * ratio;
+                context.drawImage(image, box.x + (box.width - width) / 2, box.y + (box.height - height) / 2, width, height);
+            };
+
+            const drawContain = (image, box) => {
+                const fitted = containBox(image, box);
+                context.drawImage(image, fitted.x, fitted.y, fitted.width, fitted.height);
+                return fitted;
+            };
+
+            const containBox = (image, box) => {
+                const ratio = Math.min(box.width / image.width, box.height / image.height);
+                const width = image.width * ratio;
+                const height = image.height * ratio;
+                return { x: box.x + (box.width - width) / 2, y: box.y + (box.height - height) / 2, width, height };
+            };
+
+            const scaledBox = (box, key) => {
+                const scale = state.scale[key];
+                const width = box.width * scale;
+                const height = box.height * scale;
+                return { x: box.x - (width - box.width) / 2, y: box.y - (height - box.height) / 2, width, height };
+            };
+
+            const roundRect = (box, radius) => { context.beginPath(); context.roundRect(box.x, box.y, box.width, box.height, radius); };
+
+            const wrapTitle = (value, maxWidth) => {
+                const words = value.split(/\s+/u);
+                const lines = [];
+                let current = '';
+                words.forEach((word) => {
+                    const candidate = current ? `${current} ${word}` : word;
+                    if (current && context.measureText(candidate).width > maxWidth) { lines.push(current); current = word; } else current = candidate;
+                });
+                if (current) lines.push(current);
+                return lines.slice(0, 2);
+            };
+
+            const drawTitleText = (box, color, size, align = 'left', yOffset = 0) => {
+                context.fillStyle = color;
+                context.font = `700 ${size * state.scale.title}px Georgia, serif`;
+                context.textBaseline = 'middle';
+                context.textAlign = align;
+                const lines = wrapTitle(state.title, box.width - 68);
+                const lineHeight = 30 * state.scale.title;
+                const firstLineY = box.y + box.height / 2 - (lines.length - 1) * lineHeight / 2 + yOffset;
+                const x = align === 'center' ? box.x + box.width / 2 : box.x + 34;
+                lines.forEach((line, index) => context.fillText(line, x, firstLineY + index * lineHeight));
+                context.textAlign = 'left';
+            };
+
+            const drawTitle = (box) => {
+                const fill = state.colors.subtitleFill;
+                const ink = state.colors.subtitleText;
+                const accent = state.colors.accent;
+                const shadow = () => { context.shadowColor = 'rgba(11, 25, 48, .2)'; context.shadowBlur = 18; context.shadowOffsetY = 10; };
+                const clean = () => { context.shadowColor = 'transparent'; context.shadowBlur = 0; context.shadowOffsetY = 0; };
+                context.save();
+                if (state.titleStyle === 'ribbon') {
+                    shadow();
+                    context.fillStyle = accent;
+                    context.beginPath();
+                    context.moveTo(box.x - 24, box.y + 28); context.lineTo(box.x + 12, box.y); context.lineTo(box.x + box.width - 12, box.y); context.lineTo(box.x + box.width + 24, box.y + 28); context.lineTo(box.x + box.width - 12, box.y + box.height); context.lineTo(box.x + 12, box.y + box.height); context.closePath(); context.fill();
+                    clean();
+                    drawTitleText(box, '#ffffff', 24, 'center', 0);
+                } else if (state.titleStyle === 'ink') {
+                    context.fillStyle = 'rgba(247, 235, 215, .82)';
+                    context.fillRect(box.x + 18, box.y + 18, box.width - 36, box.height - 36);
+                    context.strokeStyle = accent; context.lineWidth = 5; context.lineCap = 'round';
+                    context.beginPath(); context.moveTo(box.x + 30, box.y + box.height - 22); context.quadraticCurveTo(box.x + box.width / 2, box.y + box.height - 8, box.x + box.width - 28, box.y + box.height - 25); context.stroke();
+                    drawTitleText(box, ink, 25, 'left', -4);
+                } else if (state.titleStyle === 'poster') {
+                    shadow(); context.fillStyle = '#08182b'; context.fillRect(box.x, box.y, box.width, box.height); clean();
+                    context.fillStyle = accent; context.fillRect(box.x, box.y, 12, box.height);
+                    drawTitleText(box, fill, 27, 'left', 0);
+                } else if (state.titleStyle === 'ticket') {
+                    shadow(); context.fillStyle = fill; context.beginPath(); context.moveTo(box.x + 20, box.y); context.lineTo(box.x + box.width - 20, box.y); context.quadraticCurveTo(box.x + box.width, box.y, box.x + box.width, box.y + 20); context.lineTo(box.x + box.width, box.y + box.height - 20); context.quadraticCurveTo(box.x + box.width, box.y + box.height, box.x + box.width - 20, box.y + box.height); context.lineTo(box.x + 20, box.y + box.height); context.quadraticCurveTo(box.x, box.y + box.height, box.x, box.y + box.height - 20); context.lineTo(box.x, box.y + 20); context.quadraticCurveTo(box.x, box.y, box.x + 20, box.y); context.closePath(); context.fill(); clean();
+                    context.fillStyle = accent; context.fillRect(box.x + 26, box.y + 20, 68, 5); drawTitleText(box, ink, 24, 'left', 4);
+                } else if (state.titleStyle === 'marker') {
+                    context.strokeStyle = accent; context.globalAlpha = .55; context.lineWidth = 34; context.lineCap = 'round'; context.beginPath(); context.moveTo(box.x + 24, box.y + box.height / 2 + 4); context.lineTo(box.x + box.width - 24, box.y + box.height / 2 - 4); context.stroke(); context.globalAlpha = 1; drawTitleText(box, ink, 25, 'left', -2);
+                } else if (state.titleStyle === 'split') {
+                    shadow(); context.fillStyle = ink; context.fillRect(box.x, box.y, box.width * .38, box.height); context.fillStyle = fill; context.fillRect(box.x + box.width * .38, box.y, box.width * .62, box.height); clean();
+                    context.fillStyle = accent; context.fillRect(box.x + box.width * .38 - 5, box.y, 10, box.height); drawTitleText({ ...box, x: box.x + box.width * .38, width: box.width * .62 }, ink, 22, 'center', 0);
+                } else if (state.titleStyle === 'capsule') {
+                    const pill = { x: box.x + 14, y: box.y + 20, width: box.width - 28, height: box.height - 40 }; shadow(); context.fillStyle = fill; roundRect(pill, pill.height / 2); context.fill(); clean(); context.strokeStyle = accent; context.lineWidth = 3; roundRect(pill, pill.height / 2); context.stroke(); drawTitleText(pill, ink, 23, 'center', 0);
+                } else if (state.titleStyle === 'corner') {
+                    context.fillStyle = fill; context.globalAlpha = .86; context.fillRect(box.x + 26, box.y + 22, box.width - 52, box.height - 44); context.globalAlpha = 1; context.strokeStyle = accent; context.lineWidth = 4; context.beginPath(); context.moveTo(box.x + 24, box.y + box.height - 24); context.lineTo(box.x + 24, box.y + 24); context.lineTo(box.x + box.width - 24, box.y + 24); context.stroke(); drawTitleText(box, ink, 24, 'left', 0);
+                } else if (state.titleStyle === 'vertical') {
+                    shadow(); context.fillStyle = fill; roundRect(box, 18); context.fill(); clean(); context.fillStyle = accent; context.fillRect(box.x + box.width - 62, box.y, 62, box.height); drawTitleText({ ...box, width: box.width - 78 }, ink, 23, 'left', 0); context.save(); context.translate(box.x + box.width - 31, box.y + box.height / 2); context.rotate(-Math.PI / 2); context.fillStyle = fill; context.font = `700 ${13 * state.scale.title}px Arial, sans-serif`; context.textAlign = 'center'; context.fillText('TÍTULO', 0, 0); context.restore();
+                } else {
+                    shadow(); context.fillStyle = fill; roundRect(box, 24); context.fill(); clean(); context.strokeStyle = ink; context.lineWidth = 2; roundRect(box, 24); context.stroke(); context.fillStyle = accent; context.fillRect(box.x + 34, box.y + 29, 48, 4); context.beginPath(); context.arc(box.x + 92, box.y + 31, 4, 0, Math.PI * 2); context.fill(); drawTitleText(box, ink, 25, 'left', -8); context.fillRect(box.x + 34, box.y + box.height - 18, 78, 3);
+                }
+                context.restore();
+            };
+
+            const drawBrand = (box) => {
+                if (state.brandDomain === 'jjlmoya.es' && imageElements.brand) { drawContain(imageElements.brand, box); return; }
+                context.save();
+                context.font = `800 ${Math.min(32, box.height * .46)}px Arial, sans-serif`;
+                context.textBaseline = 'middle';
+                const game = 'Game';
+                const bob = 'Bob';
+                const dev = '.dev';
+                const total = context.measureText(game).width + context.measureText(bob).width + context.measureText(dev).width;
+                let x = box.x + (box.width - total) / 2;
+                const y = box.y + box.height / 2;
+                context.shadowColor = 'rgba(0, 0, 0, .35)';
+                context.shadowBlur = 8;
+                context.fillStyle = '#f4f6fb'; context.fillText(game, x, y); x += context.measureText(game).width;
+                context.fillStyle = '#11d6c4'; context.fillText(bob, x, y); x += context.measureText(bob).width;
+                context.fillStyle = '#f4f6fb'; context.fillText(dev, x, y);
+                context.restore();
+            };
+
+            const draw = () => {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#dfe5eb';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                if (state.visible.background && imageElements.background) drawCover(imageElements.background, scaledBox(positions.background, 'background'));
+                const toolBox = scaledBox(positions.tool, 'tool');
+                if (state.visible.tool && imageElements.tool) {
+                    const toolImageBox = containBox(imageElements.tool, toolBox);
+                    context.save();
+                    context.shadowColor = 'rgba(11, 25, 48, .32)';
+                    context.shadowBlur = 28;
+                    context.shadowOffsetY = 16;
+                    context.fillStyle = '#16110b';
+                    roundRect(toolImageBox, 30);
+                    context.fill();
+                    context.restore();
+                    context.save();
+                    roundRect(toolImageBox, 30);
+                    context.clip();
+                    drawContain(imageElements.tool, toolImageBox);
+                    context.restore();
+                    context.strokeStyle = state.colors.panelBorder;
+                    context.lineWidth = 3;
+                    roundRect(toolImageBox, 30);
+                    context.stroke();
+                }
+                const titleBox = scaledBox(positions.title, 'title');
+                if (state.visible.title) drawTitle(titleBox);
+                if (state.visible.mascot && imageElements.mascot) drawContain(imageElements.mascot, scaledBox(positions.mascot, 'mascot'));
+                if (state.visible.brand) drawBrand(scaledBox(positions.brand, 'brand'));
+            };
+
+            const readFile = (key, input) => {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => { loadImage(key, reader.result).then(() => { persist(); draw(); }); };
+                reader.readAsDataURL(file);
+            };
+
+            document.addEventListener('paste', (event) => {
+                const imageItem = Array.from(event.clipboardData?.items || []).find((item) => item.type.startsWith('image/'));
+                if (!imageItem) return;
+                event.preventDefault();
+                const file = imageItem.getAsFile();
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => { loadImage('tool', reader.result).then(() => { state.active = 'tool'; root.querySelector('#active-label').textContent = 'Capa activa: herramienta'; persist(); draw(); }); };
+                reader.readAsDataURL(file);
+            });
+
+            const canvasPoint = (event) => { const rect = canvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height }; };
+            const hit = (point) => ['title', 'mascot', 'brand', 'tool', 'background'].find((key) => state.visible[key] && point.x >= positions[key].x && point.x <= positions[key].x + positions[key].width && point.y >= positions[key].y && point.y <= positions[key].y + positions[key].height);
+            let drag = null;
+            canvas.addEventListener('pointerdown', (event) => { const point = canvasPoint(event); const key = hit(point); if (!key) return; drag = { key, x: point.x - positions[key].x, y: point.y - positions[key].y }; state.active = key; root.querySelector('#active-label').textContent = `Capa activa: ${key}`; canvas.classList.add('is-dragging'); canvas.setPointerCapture(event.pointerId); });
+            canvas.addEventListener('pointermove', (event) => { if (!drag) return; const point = canvasPoint(event); positions[drag.key].x = point.x - drag.x; positions[drag.key].y = point.y - drag.y; draw(); });
+            canvas.addEventListener('pointerup', () => { drag = null; canvas.classList.remove('is-dragging'); persist(); });
+
+            root.querySelector('#format').addEventListener('change', (event) => { state.format = event.target.value; applyPreset(); persist(); });
+            root.querySelector('#brand-domain').addEventListener('change', (event) => { state.brandDomain = event.target.value; draw(); persist(); });
+            root.querySelector('#title').addEventListener('input', (event) => { state.title = event.target.value; draw(); persist(); });
+            root.querySelector('#load-production').addEventListener('click', async () => {
+                const input = root.querySelector('#production-url');
+                const status = root.querySelector('#load-status');
+                const url = input.value.trim();
+                if (!url) { status.textContent = 'Introduce una URL.'; return; }
+                status.textContent = 'Cargando herramienta…';
+                try {
+                    const response = await fetch(`/api/tool?url=${encodeURIComponent(url)}`);
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error ?? 'No se pudo cargar la herramienta');
+                    state.title = result.metadata.title;
+                    state.brandDomain = result.metadata.brandDomain;
+                    root.querySelector('#title').value = state.title;
+                    await Promise.all([loadImage('background', result.backgroundImageUrl), loadImage('tool', result.toolImageUrl)]);
+                    status.textContent = `${result.metadata.brandDomain} · herramienta cargada`;
+                    persist();
+                    draw();
+                } catch (error) {
+                    status.textContent = error.message;
+                }
+            });
+            Object.entries(imageFiles).forEach(([key, id]) => root.querySelector(`#${id}`).addEventListener('change', (event) => readFile(key, event.target)));
+            ['background', 'tool', 'brand', 'mascot', 'title'].forEach((key) => root.querySelector(`#${key}-visible`).addEventListener('change', (event) => { state.visible[key] = event.target.checked; draw(); persist(); }));
+            ['background', 'tool', 'brand', 'mascot', 'title'].forEach((key) => root.querySelector(`#${key}-scale`).addEventListener('input', (event) => { state.scale[key] = Number(event.target.value) / 100; draw(); persist(); }));
+            root.querySelector('#title-style').addEventListener('change', (event) => { state.titleStyle = event.target.value; draw(); persist(); });
+            const colorInputs = { subtitleFill: 'subtitle-fill', subtitleText: 'subtitle-text', accent: 'accent', panelBorder: 'panel-border' };
+            Object.entries(colorInputs).forEach(([key, id]) => root.querySelector(`#${id}`).addEventListener('input', (event) => { state.colors[key] = event.target.value; draw(); persist(); }));
+            root.querySelector('#reset').addEventListener('click', () => { state.scale = { background: 1, tool: 1, brand: 1, mascot: 1, title: 1 }; applyPreset(); persist(); });
+            root.querySelector('#download').addEventListener('click', () => { const link = document.createElement('a'); link.download = `${state.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'social-image'}.png`; link.href = canvas.toDataURL('image/png'); link.click(); });
+            loadDefault();
+        })();
+    </script>
+</div>
