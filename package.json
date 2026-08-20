@@ -17,6 +17,10 @@
         "discover:suggest": "tsx --env-file=.env src/discover.ts",
         "discover:verticals": "tsx --env-file=.env src/discover-verticals.ts",
         "social": "tsx --env-file=.env src/social.ts",
+        "render:image": "tsx scripts/render-tool-image.ts",
+        "editor": "tsx scripts/serve-image-editor.ts",
+        "editor:image": "tsx scripts/serve-image-editor.ts",
+        "cloudflare:report": "tsx --env-file=.env scripts/cloudflare-report.ts",
         "issues": "tsx scripts/list-utility-issues.ts",
         "generate-workspace": "tsx scripts/generate-workspace.ts",
         "verify": "npm run check && npm run lint && npm run test"
@@ -33,5 +37,9 @@
         "typescript": "^5.4.0",
         "typescript-eslint": "^8.58.0",
         "vitest": "^4.1.2"
+    },
+    "dependencies": {
+        "playwright-core": "^1.62.1",
+        "sharp": "^0.35.3"
     }
 }

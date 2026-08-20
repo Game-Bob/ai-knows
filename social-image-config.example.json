@@ -1,0 +1,32 @@
+{
+    "theme": {
+        "subtitleFill": "#f7ebd7",
+        "subtitleBorder": "#08182b",
+        "accent": "#c45a2f",
+        "fontFamily": "Georgia, serif"
+    },
+    "layouts": {
+        "panoramic": {
+            "mascot": {
+                "x": 1170,
+                "y": 830,
+                "width": 104,
+                "height": 104
+            },
+            "subtitle": {
+                "x": 560,
+                "y": 82,
+                "width": 620,
+                "height": 112
+            }
+        },
+        "instagram": {
+            "subtitle": {
+                "x": 45,
+                "y": 150,
+                "width": 990,
+                "height": 130
+            }
+        }
+    }
+}

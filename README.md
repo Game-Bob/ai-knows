@@ -32,5 +32,42 @@ The project is intentionally modular. A skill extracts one source, stores the ra
 
 See [`docs/architecture.md`](docs/architecture.md) for the extension model.
 
+## Social image renderer
+
+The image renderer creates the reusable composition for tool posts from a production URL. It reads the page title, description, OG image and brand domain from `jjlmoya.es` or `gamebob.dev`, opens the page in headless Chrome or Edge, captures the real tool container and combines it with the background.
+
+```bash
+npm run render:image -- \
+  --url https://www.jjlmoya.es/utilidades/alcance-telescopio/ \
+  --format panoramic \
+  --tool-image tweetImages/alcance-telescopio-tool.png \
+  --background tweetImages/alcance-telescopio-background.png \
+  --brand-asset tweetImages/jjlmoya-overlay.png
+```
+
+Available formats are `panoramic`, `instagram`, `square` and `story`. The renderer writes both SVG and PNG files to `tweetImages/`, which is ignored by Git. If no background is supplied, it uses the page OG image. If no `--tool-image` is supplied, it captures the tool automatically; pass `--tool-selector` only when a page needs a custom container selector.
+
+The automatic capture looks for the shared tool container structure used by the sites. If the machine has no Chrome or Edge, define `CHROME_PATH` or pass an existing capture with `--tool-image`.
+
+The shared identity uses `assets/social/jjlmoya-overlay.png` and `assets/social/pixel-cat.png` by default for `jjlmoya.es`. The mascot can be replaced with `--mascot-asset`, and its position is configurable per format.
+
+The composition can be adjusted without changing the renderer by passing a JSON file with `--config`:
+
+```bash
+npm run render:image -- --url https://www.gamebob.dev/en/tools/example/ --format instagram --config social-image-config.example.json
+```
+
+The configuration overrides per-format positions and the shared palette, so the same renderer can produce consistent cards for different platforms and brands.
+
+### Visual editor
+
+For manual composition, run:
+
+```bash
+npm run editor
+```
+
+Open `http://127.0.0.1:4173`. You can paste a production URL to load its title, OG background and real tool capture automatically. You can also replace the background, tool capture, logo and mascot manually, edit the title, move layers on the canvas, scale them, change the shared colors and download the final PNG. The automatic URL renderer and the visual editor use the same layout presets and brand assets.
+
 ---
 *Don't ask the universe, ask the repo. ai-knows what's going on in GameBob Studio.*
