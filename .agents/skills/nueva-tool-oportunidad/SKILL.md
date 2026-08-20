@@ -78,6 +78,12 @@ No copiar el ranking ni la narrativa de otro informe. Las tres propuestas deben 
 
 ## 🔄 FLUJO DE TRABAJO OBLIGATORIO POR FASES
 
+### Regla de publicación sin ramas
+- Trabajar y publicar directamente sobre `main`. No crear ramas de feature, release, hotfix ni ramas temporales.
+- No crear PRs para estas herramientas salvo que el usuario lo pida expresamente.
+- Antes de publicar, comprobar que el checkout está en `main`, limpio y sincronizado con `origin/main`.
+- Ejecutar `npm run minor` únicamente sobre `main`, después de completar los quality gates. No ejecutarlo una segunda vez para trasladar un release ya creado: si el release se generó accidentalmente en otra rama, integrar ese commit en `main` mediante fast-forward y conservar su tag.
+
 ### Fase 1: Identificación e Inspiración cuando el backlog está vacío
 1. Ejecutar primero la consulta de issues abiertas descrita en la regla principal. Solo si no hay ninguna issue abierta de utilidad, sincronizar los datos con `npm run sync` y después con `npm run discover`. Si cualquiera de las sincronizaciones falla, informar del fallo y no presentar una oportunidad como actual.
 2. Analizar las tablas de detalle de `global-suggest-engine.md` junto con `gamebob.dev-sitemap.md` y `jjlmoya.es-sitemap.md`. Usar otros Markdown solo para contexto trazable y nunca para repetir conclusiones.
@@ -168,12 +174,12 @@ Ejecutar secuencialmente y verificar código de salida 0:
    - Convertir a WebP en `/d/code/jjlmoya` usando el script oficial del repositorio (PROHIBIDO crear scripts personalizados):
      ```bash
      cd /d/code/jjlmoya
-     node scripts/convert-image-to-webp.mjs <ruta-imagen-generada> public/images/og/<slug-es>.webp
+     node scripts/convert-image-to-webp.mjs <ruta-imagen-generada> public/images/utilities/<slug-es>.webp
      ```
    - Convertir a WebP en `/d/code/website` usando el script oficial del repositorio (PROHIBIDO crear scripts personalizados):
      ```bash
      cd /d/code/website
-     node scripts/image-to-webp.mjs <ruta-imagen-generada> public/images/og/<slug-en>.webp
+     node scripts/image-to-webp.mjs <ruta-imagen-generada> public/images/utilities/<slug-en>.webp
      ```
 5. Commit y push con `--no-verify` en `jjlmoya` y `website`:
    Estas acciones también requieren confirmación explícita del usuario:
@@ -241,33 +247,40 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - Usar SIEMPRE `node scripts/convert-image-to-webp.mjs` (en `jjlmoya`) y `node scripts/image-to-webp.mjs` (en `website`).
     - Queda ESTRICTAMENTE PROHIBIDO crear scripts `.cjs`/`.mjs` temporales o ejecutar convertidores ad-hoc en línea de comandos.
 
-12. **Auto-Refinamiento**:
-    - Si el usuario detecta cualquier discrepancia o aspecto a mejorar, actualizar inmediatamente este documento antes de proseguir.
+12. **Ruta de assets de utilidades**:
+    - Las imágenes de cada herramienta deben guardarse en `public/images/utilities/` tanto en `jjlmoya` como en `website`, usando el slug que devuelve el registro de cada locale.
+    - `tests/registry.test.ts` y el patrón existente de `public/images/utilities/` son la autoridad para la ruta. No crear ni usar `public/images/og/` para assets de herramientas.
 
-13. **Separación estricta entre TOOL y widget**:
+13. **Auto-Refinamiento**:
+    - Si el usuario detecta cualquier discrepancia o aspecto a mejorar, actualizar inmediatamente este documento antes de proseguir.
+    - Verificar que la etiqueta `repo:jjlmoya-utils-*` coincide con la categoría funcional de la oportunidad; si no coincide, corregir la etiqueta y la referencia de repositorio de la issue antes de seleccionar la implementación.
+
+14. **Separación estricta entre TOOL y widget**:
     - `title`, `description`, `slug`, FAQ, HowTo y SEO pertenecen a `ToolLocaleContent` y a los componentes de página. Nunca duplicar `title` o `description` dentro de `ui.ts`, `component.astro` o el widget interactivo.
     - El widget debe comenzar por el control funcional y sus resultados; el título y la descripción de la TOOL los renderiza la página consumidora.
 
-14. **Identidad artística y experiencia de museo usable**:
+15. **Identidad artística y experiencia de museo usable**:
     - Cada TOOL debe sentirse como una pieza de museo interactiva: una identidad visual propia, una composición memorable, una respuesta clara a los inputs y un resultado que apetezca explorar.
     - La técnica es una decisión de diseño, no una obligación: puede usar SVG, CSS, canvas, DOM, animación o una combinación de ellas. `dom-views.ts` debe concentrar la representación visual dinámica cuando exista.
     - Una cuadrícula de tarjetas, barras, tablas o un panel que parezca una hoja de cálculo no cuenta como dirección artística principal. Los gráficos auxiliares pueden existir, pero no sustituir la escena, metáfora visual o composición central.
     - No basta con añadir un gráfico a un formulario. La dirección artística debe gobernar la composición completa: controles, jerarquía, resultado, movimiento, estados, feedback y microinteracciones deben pertenecer al mismo lenguaje visual.
     - Un listado de valores debajo de un gráfico no es una visualización artística por sí mismo. Los datos deben estar integrados en una composición legible, alineada y con una función interpretativa clara.
-    - Antes de programar, definir la metáfora visual, la paleta, la jerarquía, el gesto de interacción y el detalle distintivo que hará que el usuario quiera usarla.
+     - Antes de programar, definir la metáfora visual, la paleta, la jerarquía, el gesto de interacción y el detalle distintivo que hará que el usuario quiera usarla.
+    - En herramientas históricas de dinero, representar visualmente las denominaciones documentadas que componen la cantidad introducida y no usar una pieza monetaria genérica como escena principal.
+    - Los selectores de periodos deben organizarse por décadas o eras, mostrar el estado activo con claridad y mantener navegación de teclado, foco visible y cierre accesible.
 
-15. **Gate visual antes de QA**:
+16. **Gate visual antes de QA**:
     - Revisar la captura o render de la herramienta antes de presentarla como lista para QA.
     - Si aparecen títulos duplicados, descripciones dentro del widget, aspecto de Excel o arte genérico, corregirlo antes de solicitar `okQA`.
 
-16. **Estándar de producción sin placeholders**:
+17. **Estándar de producción sin placeholders**:
     - Todo lo que se cree bajo esta skill está destinado a producción. No usar placeholders, texto de relleno, preguntas numeradas sin significado, lorem ipsum, valores ficticios ni estructuras sintéticas para satisfacer tests.
     - FAQ, HowTo, SEO, schemas, títulos, descripciones, labels, estados y mensajes deben ser contenido final, específico de la herramienta, útil para el usuario y revisado en su idioma. Prohibido generar contenido como `Question 1`, `Tool title: 2`, repetir una descripción para rellenar bloques o sustituir una traducción real por el texto inglés.
     - La paridad de cantidad y tipos de bloques debe resolverse traduciendo contenido real bloque a bloque. Nunca se puede conseguir mediante arrays fabricados, copias masivas, repetición de una misma frase o un helper que sintetice contenido.
     - Si falta información para escribir contenido final, detener la implementación de esa parte y pedirla o investigarla; no dejar una versión provisional en el repositorio ni presentarla como terminada.
     - Antes de `okQA`, buscar explícitamente placeholders y contenido sintético en todo el árbol de la TOOL, incluyendo SEO, FAQ, HowTo, schemas, i18n y estados vacíos. Una sola coincidencia bloquea el gate.
 
-17. **Bibliografía breve, primaria y específica**:
+18. **Bibliografía breve, primaria y específica**:
     - Incluir pocas fuentes: por defecto 2 fuentes y solo ampliar a 3 si una decisión importante de la herramienta queda sin respaldo.
     - Cada fuente debe respaldar directamente una fórmula, rango, unidad, definición, procedimiento o afirmación concreta de esa TOOL. Preferir documentación primaria, organismos profesionales, universidades, fabricantes o publicaciones técnicas originales.
     - Enlazar la página exacta que contiene la evidencia. Prohibidos como fuente bibliográfica las homepages, páginas de categoría, centros de recursos genéricos, resultados de búsqueda, listas de enlaces y artículos que solo traten el tema de forma tangencial.
