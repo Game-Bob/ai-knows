@@ -1,0 +1,41 @@
+name: Submit IndexNow URLs
+description: Submit changed and deleted URLs to the shared IndexNow endpoint.
+inputs:
+  manifest:
+    description: Path to the changed URL manifest created by indexnow-detect.
+    required: true
+  site-config:
+    description: JSON array containing baseUrl and public keyLocation for each site.
+    required: true
+  endpoint:
+    description: IndexNow endpoint.
+    required: false
+    default: https://api.indexnow.org/indexnow
+  fail-on-error:
+    description: Fail the workflow if the search engine rejects a batch.
+    required: false
+    default: "false"
+outputs:
+  submitted-count:
+    description: Number of URLs submitted.
+    value: ${{ steps.submit.outputs.submitted-count }}
+  failure-count:
+    description: Number of failed site submissions.
+    value: ${{ steps.submit.outputs.failure-count }}
+runs:
+  using: composite
+  steps:
+    - name: Submit changed URLs
+      id: submit
+      shell: bash
+      env:
+        MANIFEST: ${{ inputs.manifest }}
+        SITE_CONFIG: ${{ inputs.site-config }}
+        ENDPOINT: ${{ inputs.endpoint }}
+        FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+      run: |
+        node "$GITHUB_ACTION_PATH/../../../scripts/indexnow/indexnow.mjs" submit \
+          --manifest "$MANIFEST" \
+          --siteConfig "$SITE_CONFIG" \
+          --endpoint "$ENDPOINT" \
+          --failOnError "$FAIL_ON_ERROR"

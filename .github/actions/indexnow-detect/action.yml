@@ -1,0 +1,56 @@
+name: Detect changed IndexNow URLs
+description: Compare the current static HTML manifest with the previous successful deployment.
+inputs:
+  dist:
+    description: Directory containing the built static site.
+    required: true
+  route-map:
+    description: JSON array mapping URL path prefixes to canonical site origins.
+    required: true
+  state-branch:
+    description: Technical branch containing the previous successful page manifest.
+    required: true
+  force-all:
+    description: Notify every current page in addition to the hash comparison.
+    required: false
+    default: "false"
+  output:
+    description: Path for the changed URL manifest.
+    required: false
+    default: .indexnow/changed.json
+outputs:
+  manifest:
+    description: Changed and deleted URL manifest path.
+    value: ${{ steps.detect.outputs.manifest }}
+  changed-count:
+    description: Number of changed or deleted URLs.
+    value: ${{ steps.detect.outputs.changed-count }}
+runs:
+  using: composite
+  steps:
+    - name: Restore previous page manifest
+      shell: bash
+      env:
+        STATE_BRANCH: ${{ inputs.state-branch }}
+      run: |
+        mkdir -p .indexnow
+        git fetch origin "$STATE_BRANCH:refs/remotes/origin/$STATE_BRANCH" 2>/dev/null || true
+        if git cat-file -e "origin/$STATE_BRANCH:.indexnow/manifest.json" 2>/dev/null; then
+          git show "origin/$STATE_BRANCH:.indexnow/manifest.json" > .indexnow/manifest.json
+        fi
+    - name: Compare page fingerprints
+      id: detect
+      shell: bash
+      env:
+        DIST: ${{ inputs.dist }}
+        ROUTE_MAP: ${{ inputs.route-map }}
+        CACHE_MANIFEST: .indexnow/manifest.json
+        OUTPUT: ${{ inputs.output }}
+        FORCE_ALL: ${{ inputs.force-all }}
+      run: |
+        node "$GITHUB_ACTION_PATH/../../../scripts/indexnow/indexnow.mjs" detect \
+          --dist "$DIST" \
+          --routeMap "$ROUTE_MAP" \
+          --manifest "$CACHE_MANIFEST" \
+          --output "$OUTPUT" \
+          --forceAll "$FORCE_ALL"

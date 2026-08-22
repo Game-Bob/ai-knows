@@ -1,0 +1,32 @@
+name: Save IndexNow page manifest
+description: Persist the current page manifest after a successful production deployment.
+inputs:
+  state-branch:
+    description: Technical branch containing the previous successful page manifest.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Save current page manifest
+      shell: bash
+      env:
+        STATE_BRANCH: ${{ inputs.state-branch }}
+      run: |
+        TEMP_DIR=$(mktemp -d)
+        git fetch origin "$STATE_BRANCH:refs/remotes/origin/$STATE_BRANCH" 2>/dev/null || true
+        if git show-ref --verify --quiet "refs/remotes/origin/$STATE_BRANCH"; then
+          git worktree add --detach "$TEMP_DIR" "origin/$STATE_BRANCH"
+          git -C "$TEMP_DIR" switch -C "$STATE_BRANCH" "origin/$STATE_BRANCH"
+        else
+          git worktree add --detach "$TEMP_DIR" HEAD
+          git -C "$TEMP_DIR" switch --orphan "$STATE_BRANCH"
+          git -C "$TEMP_DIR" rm -rf . >/dev/null 2>&1 || true
+        fi
+        mkdir -p "$TEMP_DIR/.indexnow"
+        cp "$GITHUB_WORKSPACE/.indexnow/manifest.json" "$TEMP_DIR/.indexnow/manifest.json"
+        git -C "$TEMP_DIR" add .indexnow/manifest.json
+        if ! git -C "$TEMP_DIR" diff --cached --quiet; then
+          git -C "$TEMP_DIR" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "chore: update IndexNow manifest"
+          git -C "$TEMP_DIR" push origin "$STATE_BRANCH"
+        fi
+        git worktree remove "$TEMP_DIR" --force
