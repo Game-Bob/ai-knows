@@ -293,6 +293,7 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - Enlazar la página exacta que contiene la evidencia. Prohibidos como fuente bibliográfica las homepages, páginas de categoría, centros de recursos genéricos, resultados de búsqueda, listas de enlaces y artículos que solo traten el tema de forma tangencial.
     - No añadir fuentes para aparentar rigor ni repetir varias fuentes que sostengan la misma afirmación. La bibliografía debe ser corta, trazable y visible en la sección de referencias con nombre de la fuente, título específico y URL directa.
     - Antes de `okQA`, revisar cada enlace y anotar internamente qué parte concreta de la calculadora justifica. Si una fuente no permite justificar una decisión concreta, eliminarla o sustituirla.
+    - La bibliografía debe respaldar la ciencia, disciplina o procedimiento que el usuario estudia con la TOOL, no la tecnología usada para implementarla. En una herramienta científica, médica, acústica o técnica, citar investigaciones, normas y métodos del dominio; no citar Web APIs, frameworks, Canvas, Web Audio, lenguajes ni documentación de plataforma salvo que la propia TOOL enseñe específicamente ese estándar web.
 
 20. **Alcance geográfico y slugs long tail cuando la oportunidad es local**:
     - Si la normativa, los datos o la intención pertenecen a un país concreto, limitar la TOOL explícitamente a ese país y no añadir selectores de país ni aproximaciones de otros regímenes que compliquen o debiliten el resultado.
@@ -302,3 +303,12 @@ Ejecutar secuencialmente y verificar código de salida 0:
 21. **Espacio tipográfico seguro para cifras**:
     - Los inputs y resultados numéricos deben reservar altura, anchura y padding suficientes para que ningún dígito, signo, símbolo monetario o separador decimal quede recortado.
     - Verificar con valores mínimos, habituales y máximos, formatos largos de cada locale y los breakpoints reales de escritorio y móvil antes de solicitar `okQA`.
+
+22. **Onboarding visible y valores coherentes con el contexto**:
+    - Una TOOL con conversión entre origen y destino debe explicar dentro del widget, antes de los controles, el recorrido mínimo: qué dato actual introduce el usuario, qué destino elige y dónde usa el resultado.
+    - Los conceptos técnicos auxiliares no pueden competir con el resultado principal. Deben aparecer después del flujo básico y explicarse en lenguaje natural.
+    - Al cambiar un perfil cuyo sistema de escala sea distinto, no conservar silenciosamente un valor numérico que pertenecía al perfil anterior. Restablecer un ejemplo sensato o preservar explícitamente la magnitud física, e informar del comportamiento.
+    - Los sliders que concentran los valores útiles en unos pocos píxeles o no representan bien escalas muy distintas deben eliminarse o sustituirse por controles adaptados al perfil.
+    - Las acciones centrales entre origen y destino, como invertir o transferir, deben conservar icono y etiqueta legibles sin saltos torpes, recortes ni formas que contradigan la longitud del texto en los breakpoints reales.
+    - No usar caracteres tipográficos improvisados como chevrons, flechas de select o iconos funcionales cuando su forma, peso o alineación desentonen con la interfaz. Dibujarlos con CSS/SVG o usar el sistema de iconos del repositorio, con estado abierto y cerrado coherente.
+    - Antes de `okQA`, una persona debe poder describir cómo usar la TOOL mirando solo el primer viewport, sin recurrir al contenido SEO inferior.
