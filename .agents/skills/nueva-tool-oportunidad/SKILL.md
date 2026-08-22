@@ -15,17 +15,12 @@ Guía automatizada para identificar, crear, validar, traducir y publicar una nue
 `ai-knows` es el orquestador y su backlog de issues aceptadas es la cola de trabajo canónica. Cada ejecución de esta skill debe seguir este loop:
 
 1. Consultar primero las issues abiertas de `Game-Bob/ai-knows` con `gh issue list --repo Game-Bob/ai-knows --state open`.
-2. Si existe al menos una issue abierta con una etiqueta `repo:jjlmoya-utils-*`, seleccionar la siguiente oportunidad priorizada y trabajar sobre ella. No ejecutar discovery ni crear otra issue en este ciclo.
-3. Si hay varias issues, priorizarlas en este orden:
-   - urgencia o prioridad explícita en etiquetas o en el cuerpo de la issue;
-   - evidencia de tráfico o intención de búsqueda fuerte y concreta;
-   - utilidad transversal, alcance client-side y bajo riesgo de validación;
-   - menor dependencia de datos externos o de otro repositorio;
-   - antigüedad de la issue como desempate.
+2. Si existe al menos una issue abierta con una etiqueta `repo:jjlmoya-utils-*`, seleccionarla y trabajar sobre ella. No ejecutar discovery ni crear otra issue en este ciclo.
+3. Si hay varias issues, coger siempre la más antigua (`createdAt` ascendente). El backlog se vacía en FIFO: se van a hacer todas, no se rankea, no se compara tráfico ni riesgo entre candidatas, no se escribe un ensayo de priorización. La más nueva queda para más adelante.
 4. Antes de implementar una issue seleccionada, leer su título, cuerpo, etiquetas, comentarios y el repositorio propietario indicado por la etiqueta `repo:`. Confirmar que el alcance sigue siendo coherente y detectar duplicados.
 5. Si no hay ninguna issue abierta de utilidad, pasar al discovery descrito abajo.
-6. Cuando el usuario acepte una oportunidad nueva descubierta, crear una issue en `Game-Bob/ai-knows` con `gh issue create`, incluyendo la etiqueta `repo:jjlmoya-utils-<categoría>`, el alcance, la razón de priorización y la relación con los datos observados. No saltar directamente a implementar esa oportunidad en el mismo ciclo: la siguiente ejecución debe recogerla desde el backlog abierto.
-7. Después de crear la issue, detener la fase de discovery y entregar el enlace y la prioridad propuesta. La implementación comienza en una ejecución posterior, cuando la issue sea la siguiente seleccionada.
+6. Cuando el usuario acepte una oportunidad nueva descubierta, crear una issue en `Game-Bob/ai-knows` con `gh issue create`, incluyendo la etiqueta `repo:jjlmoya-utils-<categoría>`, el alcance y la relación con los datos observados. No saltar directamente a implementar esa oportunidad en el mismo ciclo: la siguiente ejecución debe recogerla desde el backlog abierto.
+7. Después de crear la issue, detener la fase de discovery y entregar el enlace. La implementación comienza en una ejecución posterior, cuando esa issue sea la más antigua abierta.
 
 Una issue solo deja de ser parte de la cola cuando se implementa y se cierra con evidencia, o cuando se descarta explícitamente como no planificada. No crear issues duplicadas si ya existe una oportunidad equivalente abierta.
 
@@ -52,10 +47,9 @@ La skill debe sugerir oportunidades a partir de datos sincronizados del workspac
 
 ### Resultado mínimo de la sugerencia
 
-Cuando hay issues abiertas, no presentar tres oportunidades nuevas. Presentar:
+Cuando hay issues abiertas, no presentar tres oportunidades nuevas ni justificar por qué esta gana a las demás. Presentar:
 
-- la issue seleccionada y su enlace;
-- la evidencia que justifica su prioridad frente a las demás abiertas;
+- la issue más antigua, su enlace y que se eligió por FIFO;
 - el repositorio propietario y la etiqueta usada;
 - el alcance que se va a implementar;
 - dependencias, riesgos y criterio de cierre.
@@ -208,6 +202,11 @@ Ejecutar secuencialmente y verificar código de salida 0:
    - Construir siempre con control de apertura, selección de valor y cierre al hacer clic fuera.
    - En `controller.ts`, sincronizar el valor interno con el texto del botón trigger y las clases activas.
 
+2.1. **Sistema de unidades global en la TOOL**:
+   - Cualquier TOOL que use unidades del sistema internacional debe ofrecer un botón global visible para cambiar entre `Metric` e `Imperial`.
+   - El cambio debe actualizar todos los inputs, etiquetas, presets, resultados y densidades compatibles, conservar el valor físico subyacente y persistir de forma segura en `localStorage`.
+   - No mezclar unidades en una misma vista ni esconder la elección dentro de un selector secundario.
+
 3. **Cero Comentarios en Código (`no-comments/disallowComments`)**:
    - CERO comentarios en `.ts`, `.astro`, `.css`, `.json`. En bloques catch vacíos, usar `catch {}`.
 
@@ -271,7 +270,14 @@ Ejecutar secuencialmente y verificar código de salida 0:
 
 16. **Gate visual antes de QA**:
     - Revisar la captura o render de la herramienta antes de presentarla como lista para QA.
-    - Si aparecen títulos duplicados, descripciones dentro del widget, aspecto de Excel o arte genérico, corregirlo antes de solicitar `okQA`.
+    - Si aparecen títulos duplicados, descripciones dentro del widget, aspecto de Excel, arte genérico o el cromo de otra TOOL (rail de presets, ticket/sello, workshop, misma rejilla de chips y sliders), corregirlo antes de solicitar `okQA`.
+
+19. **Prohibido clonar tools anteriores**:
+    - Cada TOOL se inventa desde su problema, no desde la memoria de la última TOOL ni desde un hermano del repo.
+    - Prohibido abrir `component.astro`, CSS, `controller.ts` o `dom-views.ts` de otra utilidad para copiar layout, metáfora, paleta, jerarquía, gestos o nombres de clases. Esas copias producen el mismo taller con otro dibujo.
+    - De otros tools solo se pueden leer contratos: `entry.ts`, `index.ts`, `tools.ts`, `entries.ts`, `types.ts`, tests de conteo, schemas, i18n shape, eslint y stylelint.
+    - La escena, los controles y el resultado deben ser la respuesta a ESTA ficha: qué cuenta el usuario, qué ve, qué toca. Si la interfaz funcionaría igual cambiando las etiquetas, está mal.
+    - Antes de programar, escribir en una frase la metáfora que solo tiene sentido para esta TOOL. Si la frase sirve para una cadena de bici, un LED o un resistor, tirarla y empezar otra.
 
 17. **Estándar de producción sin placeholders**:
     - Todo lo que se cree bajo esta skill está destinado a producción. No usar placeholders, texto de relleno, preguntas numeradas sin significado, lorem ipsum, valores ficticios ni estructuras sintéticas para satisfacer tests.
@@ -283,6 +289,16 @@ Ejecutar secuencialmente y verificar código de salida 0:
 18. **Bibliografía breve, primaria y específica**:
     - Incluir pocas fuentes: por defecto 2 fuentes y solo ampliar a 3 si una decisión importante de la herramienta queda sin respaldo.
     - Cada fuente debe respaldar directamente una fórmula, rango, unidad, definición, procedimiento o afirmación concreta de esa TOOL. Preferir documentación primaria, organismos profesionales, universidades, fabricantes o publicaciones técnicas originales.
+    - Priorizar la fuente oficial aunque esté publicada en un idioma distinto al locale de la TOOL. No sustituir una norma, organismo o documento oficial por una fuente secundaria solo para igualar el idioma de la interfaz.
     - Enlazar la página exacta que contiene la evidencia. Prohibidos como fuente bibliográfica las homepages, páginas de categoría, centros de recursos genéricos, resultados de búsqueda, listas de enlaces y artículos que solo traten el tema de forma tangencial.
     - No añadir fuentes para aparentar rigor ni repetir varias fuentes que sostengan la misma afirmación. La bibliografía debe ser corta, trazable y visible en la sección de referencias con nombre de la fuente, título específico y URL directa.
     - Antes de `okQA`, revisar cada enlace y anotar internamente qué parte concreta de la calculadora justifica. Si una fuente no permite justificar una decisión concreta, eliminarla o sustituirla.
+
+20. **Alcance geográfico y slugs long tail cuando la oportunidad es local**:
+    - Si la normativa, los datos o la intención pertenecen a un país concreto, limitar la TOOL explícitamente a ese país y no añadir selectores de país ni aproximaciones de otros regímenes que compliquen o debiliten el resultado.
+    - El slug de cada idioma debe ser una long tail localizada que exprese la utilidad, la intención principal y el país. No traducir mecánicamente el slug inglés ni usar un slug corto genérico.
+    - Para calculadoras salariales de España, cada slug debe conservar en su idioma las ideas de salario bruto/neto, coste empresarial, calculadora y España.
+
+21. **Espacio tipográfico seguro para cifras**:
+    - Los inputs y resultados numéricos deben reservar altura, anchura y padding suficientes para que ningún dígito, signo, símbolo monetario o separador decimal quede recortado.
+    - Verificar con valores mínimos, habituales y máximos, formatos largos de cada locale y los breakpoints reales de escritorio y móvil antes de solicitar `okQA`.
