@@ -1,0 +1,4 @@
+interface:
+  display_name: "Completa la tool"
+  short_description: "Completa la tool después de okQA"
+  default_prompt: "Usa $completa-la-tool para continuar esta TOOL desde el okQA y completar localización, validación y publicación."

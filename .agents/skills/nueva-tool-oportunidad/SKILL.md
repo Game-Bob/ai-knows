@@ -12,6 +12,8 @@ Guía automatizada para identificar, crear, validar, traducir y publicar una nue
 
 ## 🔄 REGLA PRINCIPAL: BACKLOG DE `ai-knows` ANTES QUE DISCOVERY
 
+**Excepción por alcance explícito del usuario:** si el usuario identifica de forma directa una herramienta concreta, aporta su referencia funcional o visual y pide implementarla en un repositorio específico, ese alcance prevalece sobre la selección FIFO del backlog. La issue del backlog se conserva intacta y no se presenta como la oportunidad implementada.
+
 `ai-knows` es el orquestador y su backlog de issues aceptadas es la cola de trabajo canónica. Cada ejecución de esta skill debe seguir este loop:
 
 1. Consultar primero las issues abiertas de `Game-Bob/ai-knows` con `gh issue list --repo Game-Bob/ai-knows --state open`.
@@ -27,6 +29,10 @@ Una issue solo deja de ser parte de la cola cuando se implementa y se cierra con
 ## 🔎 REGLA DE SINCRONIZACIÓN Y SUGERENCIA
 
 La skill debe sugerir oportunidades a partir de datos sincronizados del workspace, no de conclusiones ya empaquetadas por otro informe.
+
+### Ubicación local de los repositorios
+
+Los repositorios `jjlmoya-utils-*` ya están descargados como directorios hermanos de `ai-knows`, en `../`. Antes de implementar, resolver siempre el directorio local existente a partir de la etiqueta `repo:` y comprobar su estado con `git -C`; no clonar repositorios ni crear copias alternativas. El nombre local puede diferir del nombre inferido de la etiqueta, por lo que se debe localizar primero entre los directorios hermanos y usar la copia ya descargada. Si el repositorio propietario no existe localmente, detenerse e informar del bloqueo.
 
 ### Fuente y orden de lectura obligatorio
 
@@ -120,7 +126,7 @@ No copiar el ranking ni la narrativa de otro informe. Las tres propuestas deben 
    - `evaluator.ts`: Diagnósticos de estado y badges.
    - `dom-views.ts`: Formateadores de datos y arte visual dinámico, usando la técnica adecuada (SVG, CSS, canvas o DOM) con soporte `--n-*` para temas claro y oscuro.
    - `controller.ts`: Gestión de eventos, sliders síncronos, custom selects y chips de presets.
-   - `<tool-id>.css`: Estilos Vanilla CSS estructurados con tokens `--n-*`.
+   - `<english-slug>.css`: Estilos Vanilla CSS estructurados con tokens `--n-*`; el nombre debe coincidir exactamente con el `slug` de `en.ts` para que el preview lo cargue.
    - `component.astro`: Vista de la herramienta pre-renderizada en SSR con hidratación limpia vía `<script is:inline type="application/json">`.
    - `bibliography.ts` & `bibliography.astro`: Citas bibliográficas autoritativas.
    - `seo.astro`: Renderizado SEO resiliente con fallbacks.
@@ -201,6 +207,7 @@ Ejecutar secuencialmente y verificar código de salida 0:
 2. **Custom Selects en Lugar de Selects Nativos**:
    - Construir siempre con control de apertura, selección de valor y cierre al hacer clic fuera.
    - En `controller.ts`, sincronizar el valor interno con el texto del botón trigger y las clases activas.
+   - Un selector sin opciones útiles no puede parecer interactivo ni desplegar un panel vacío. Antes de que existan opciones debe estar oculto o visiblemente deshabilitado, explicar qué acción las habilita y no mostrar chevron ni estado abierto.
 
 2.1. **Sistema de unidades global en la TOOL**:
    - Cualquier TOOL que use unidades del sistema internacional debe ofrecer un botón global visible para cambiar entre `Metric` e `Imperial`.
@@ -213,6 +220,9 @@ Ejecutar secuencialmente y verificar código de salida 0:
 4. **Variables CSS en Stylelint (`scale-unlimited/declaration-strict-value` y Hex Cortos)**:
    - Declarar todas las variables de color en `:root` y `.theme-dark` (`--n-*`).
    - Usar notación hex corta (ej. `#fff` en lugar de `#ffffff`).
+   - `:root` debe ser una paleta clara real, con superficies luminosas, texto oscuro y contraste verificable. `.theme-dark` debe redefinirla como paleta oscura real. No se acepta que ambos modos sean oscuros ni que solo cambien matices.
+   - Si el usuario rechaza los degradados, no debe quedar ningún `gradient()` decorativo en la herramienta: usar superficies sólidas y comprobar explícitamente el contraste de texto, botones, estados y notas en ambos temas.
+   - Revisar el estado inicial por separado del estado activo: no convertir una herramienta aún cerrada en un visor vacío gigante ni en un segundo hero de marketing dentro de la propia herramienta.
 
 5. **Trío Obligatorio de Schemas JSON-LD en los 15 Idiomas**:
    - `SoftwareApplication`, `FAQPage` y `HowTo` tipados con `schema-dts` en todos los archivos i18n.
@@ -252,6 +262,13 @@ Ejecutar secuencialmente y verificar código de salida 0:
 
 13. **Auto-Refinamiento**:
     - Si el usuario detecta cualquier discrepancia o aspecto a mejorar, actualizar inmediatamente este documento antes de proseguir.
+    - Cuando una TOOL use tokens `--n-*`, aislar sus variables dentro de la card raíz de la propia TOOL además de declarar la paleta base, para evitar colisiones con tokens globales del proyecto consumidor. En modo oscuro, revisar también el contraste de etiquetas colocadas sobre ilustraciones o formas de color.
+    - Si el usuario detecta una interfaz clonada, un contenedor sobredimensionado o sombras exteriores exageradas, detener el gate visual y hacer tres pasadas explícitas: adelgazar el cromo, redefinir la metáfora visual desde el problema y revisar la jerarquía de contenido y SEO. No solicitar `okQA` hasta comprobar el render tras las tres pasadas.
+    - Si los presets parecen botones flotantes o la herramienta se percibe como paneles desconectados, agruparlos dentro de una única card estructural con separadores internos y revisar el render antes de continuar.
+    - Cuando una vista Astro genere filas, opciones u otro HTML dinámico como cadena, insertar la cadena explícitamente con `set:html` o construir nodos tipados; nunca interpolarla como texto, porque el render puede mostrar las etiquetas HTML al usuario.
+    - En cualquier TOOL de temperatura, mostrar el símbolo `°` junto a cada unidad y ofrecer un conmutador global visible entre `Metric °C` e `Imperial °F`; inputs, rangos, resultados, tablas, estado persistido y etiquetas deben cambiar sin alterar la temperatura física subyacente.
+    - Si el usuario identifica un negro verdoso o lavado en el tema oscuro, redefinir la paleta hacia negros carbón reales y reservar los tonos verdes para reflejos o estados funcionales; volver a revisar contraste y render antes del gate visual.
+    - Si una captura muestra una calculadora como dashboard oscuro genérico, una metáfora que solo adorna el formulario, una cifra principal que rompe sus unidades, o un badge que no coincide con el preset activo, detener la presentación y rehacer composición, tipografía, formato de cifras y estados antes de continuar.
     - Verificar que la etiqueta `repo:jjlmoya-utils-*` coincide con la categoría funcional de la oportunidad; si no coincide, corregir la etiqueta y la referencia de repositorio de la issue antes de seleccionar la implementación.
 
 14. **Separación estricta entre TOOL y widget**:
@@ -294,6 +311,7 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - No añadir fuentes para aparentar rigor ni repetir varias fuentes que sostengan la misma afirmación. La bibliografía debe ser corta, trazable y visible en la sección de referencias con nombre de la fuente, título específico y URL directa.
     - Antes de `okQA`, revisar cada enlace y anotar internamente qué parte concreta de la calculadora justifica. Si una fuente no permite justificar una decisión concreta, eliminarla o sustituirla.
     - La bibliografía debe respaldar la ciencia, disciplina o procedimiento que el usuario estudia con la TOOL, no la tecnología usada para implementarla. En una herramienta científica, médica, acústica o técnica, citar investigaciones, normas y métodos del dominio; no citar Web APIs, frameworks, Canvas, Web Audio, lenguajes ni documentación de plataforma salvo que la propia TOOL enseñe específicamente ese estándar web.
+    - En testers de cámara, audio o comunicación, citar guías y estudios sobre iluminación, encuadre, legibilidad visual, calidad perceptual o preparación de videollamadas. Las especificaciones de `getUserMedia`, WebRTC, Canvas o callbacks de frames son documentación interna de implementación y no pertenecen a la bibliografía visible.
 
 20. **Alcance geográfico y slugs long tail cuando la oportunidad es local**:
     - Si la normativa, los datos o la intención pertenecen a un país concreto, limitar la TOOL explícitamente a ese país y no añadir selectores de país ni aproximaciones de otros regímenes que compliquen o debiliten el resultado.
@@ -310,5 +328,57 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - Al cambiar un perfil cuyo sistema de escala sea distinto, no conservar silenciosamente un valor numérico que pertenecía al perfil anterior. Restablecer un ejemplo sensato o preservar explícitamente la magnitud física, e informar del comportamiento.
     - Los sliders que concentran los valores útiles en unos pocos píxeles o no representan bien escalas muy distintas deben eliminarse o sustituirse por controles adaptados al perfil.
     - Las acciones centrales entre origen y destino, como invertir o transferir, deben conservar icono y etiqueta legibles sin saltos torpes, recortes ni formas que contradigan la longitud del texto en los breakpoints reales.
+
+23. **Controles cerrados y campos cohesionados**:
+    - Todo custom select debe nacer cerrado. El atributo `hidden` debe tener una regla de autor explícita cuando el estilo del panel use `display`, para que el menú no aparezca desplegado en el estado inicial.
+    - Todos los inputs de una TOOL deben compartir una superficie, borde, altura, padding, tipografía y estado de foco coherentes; no se acepta que los campos dinámicos vuelvan al estilo nativo del navegador mientras los demás están tematizados.
     - No usar caracteres tipográficos improvisados como chevrons, flechas de select o iconos funcionales cuando su forma, peso o alineación desentonen con la interfaz. Dibujarlos con CSS/SVG o usar el sistema de iconos del repositorio, con estado abierto y cerrado coherente.
     - Antes de `okQA`, una persona debe poder describir cómo usar la TOOL mirando solo el primer viewport, sin recurrir al contenido SEO inferior.
+
+23. **Cada acción debe pagar su espacio**:
+    - Antes de añadir botones secundarios como copiar, exportar, compartir, descargar o resetear, responder qué decisión concreta facilita y quién necesita el resultado fuera de la TOOL.
+    - Si la respuesta es genérica, hipotética o no mejora la intención principal, eliminar la acción. No conservar una función solo porque sea fácil de implementar.
+
+24. **SEO centrado en el problema y el dominio**:
+    - El contenido SEO debe enseñar a conseguir un mejor resultado con la TOOL, interpretar sus señales, diagnosticar problemas frecuentes y actuar sobre ellos.
+    - La implementación técnica, APIs, eventos, almacenamiento, frameworks y decisiones internas no son contenido útil para el usuario salvo que la intención de búsqueda sea aprender esa tecnología.
+    - Antes de `okQA`, cada bloque SEO debe superar esta pregunta: ¿ayuda a preparar, decidir, corregir o entender algo del problema real? Si solo describe cómo está programada la TOOL, se elimina.
+
+25. **Autocrítica escrita y visible antes de `okQA`**:
+    - No basta con revisar mentalmente el Manifiesto ARTE y las preguntas UX/SEO. Antes de solicitar `okQA`, escribir las respuestas concretas, enumerar los fallos detectados y describir las correcciones aplicadas.
+    - Si una pregunta se responde con "sí" o "no" sin evidencia del render, del flujo o del contenido, la autocrítica no está completa.
+
+26. **Herramientas deportivas de consulta recurrente**:
+    - Cuando la utilidad gestiona una liga, competición o temporada, no reducirla a una visualización del sorteo. Debe cubrir el bucle cotidiano completo que el usuario vuelve a consultar: calendario, jornada activa, introducción y corrección de resultados, clasificación recalculada, estado persistente y transferencia íntegra de la competición.
+    - Compartir por enlace o archivo debe transportar todo el estado necesario para reconstruir la competición, incluidos configuración, emparejamientos y resultados, no solo la lista inicial de participantes.
+    - La dirección visual debe partir de productos deportivos actuales: densidad informativa controlada, jerarquía clara, tablas legibles, marcadores editables, navegación rápida por jornadas y estados inequívocos. No convertir una metáfora artística en el contenido principal si resta espacio o velocidad a datos que se consultan repetidamente.
+    - Evitar paneles vacíos sobredimensionados, ilustraciones ornamentales dominantes, columnas que estrangulan el texto, paletas lúgubres de bajo contraste y acciones deshabilitadas que parecen activas. El primer viewport debe mostrar qué se configura y una anticipación realista de calendario, resultados y clasificación.
+    - Antes de diseñar una TOOL deportiva, revisar referencias actuales del dominio y escribir qué patrones se adoptan para navegación, tabla, marcador, responsive y compartición. La identidad propia se aplica al acabado, no debe reemplazar las convenciones que permiten leer una competición de un vistazo.
+
+27. **QA visual delegado por el usuario**:
+    - Si el usuario indica que realizará personalmente el QA visual, no abrir ni controlar navegadores ni ejecutar automatización visual. Limitar la verificación propia a lógica, tipado, lint, tests y build, entregar la ruta de preview y esperar su revisión explícita.
+
+28. **Gestores de liguillas para grupos reales**:
+    - Una TOOL para llevar ligas round robin debe plantearse como un producto de uso compartido por un grupo, no como un generador abstracto. El nombre, slug, id, textos y navegación deben expresar gestión de liga, no solamente generación de calendario.
+    - Debe admitir varias ligas independientes en `localStorage`, con biblioteca para crear, abrir, renombrar y eliminar cada competición sin sobrescribir las demás.
+    - Cada liga debe conservar participantes, formato, calendario, jornada seleccionada, resultados y reglas de puntuación. La clasificación se recalcula con cada marcador y el enlace compartido debe reconstruir una copia íntegra de esa liga.
+    - La pantalla principal de una liga debe priorizar el trabajo recurrente: cambiar de jornada, introducir resultados, consultar clasificación y compartir. La configuración inicial y la teoría del emparejamiento quedan en segundo plano.
+
+29. **Carga de estilos verificada por slug inglés**:
+    - El CSS de la TOOL debe llamarse exactamente como el `slug` declarado en `en.ts`: `src/tool/<tool-id>/<english-slug>.css`. El preview resuelve los estilos por ese slug, que puede ser una long tail distinta del `entry.id`.
+    - Antes del gate visual, comprobar en la ruta compilada que las reglas de clase específicas de la TOOL están cargadas. Una página con controles nativos sin estilizar, SVG negro o layout lineal bloquea inmediatamente `okQA`, aunque type-check, lint, tests y build pasen.
+
+30. **Leyendas, badges y geometría deben pagar su significado**:
+    - Cada símbolo de una leyenda debe aparecer realmente en el render y reproducir la misma forma, color y orientación que el elemento dibujado. Si el usuario no puede emparejar ambos de un vistazo, eliminar la leyenda o corregir la representación.
+    - Prohibido mostrar como badge una garantía básica del algoritmo, como "todo conectado", cuando no informa una excepción ni habilita una decisión. Las garantías se prueban; los avisos visibles se reservan para estados que exigen atención o interpretación.
+    - Puertas, uniones, flechas, marcadores y nodos deben anclarse a la geometría real. No se aceptan símbolos flotantes, orientación fija cuando la estructura cambia ni puntos sin etiqueta o función comprensible.
+
+31. **Corrección directa en generadores visuales exportables**:
+    - Cuando una TOOL genera un mapa, plano, diagrama o composición que el usuario exportará para una sesión real, evaluar explícitamente si necesita corrección manual. Si una generación imperfecta obliga a regenerarlo todo, incorporar edición local de los elementos esenciales o justificar por escrito por qué dañaría la intención.
+    - Las ediciones deben verse en PNG/SVG y conservarse en cualquier formato de estado compartido que prometa reconstruir el resultado.
+
+32. **Ningún control nuevo sin layout final**:
+    - Después de añadir presets, botones, details, toolbars o acciones, volver a capturar el primer viewport antes de enseñarlo. Controles nativos amontonados, textos pegados, wrapping accidental o acciones fuera de jerarquía bloquean la presentación al usuario.
+
+33. **SEO y contenido con criterio editorial**:
+    - El texto SEO no puede ser una extensión genérica de la interfaz ni repetir etiquetas, advertencias o fórmulas sin enseñar una decisión del dominio. Cada bloque debe aportar contexto, interpretación, límites o una acción concreta que el usuario pueda aplicar.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gata Pose"
+  short_description: "Crea y coloca gatitas de branding por herramienta"
+  default_prompt: "Usa $gata-pose para crear primero una gatita independiente y después integrarla en esta imagen según la herramienta."
