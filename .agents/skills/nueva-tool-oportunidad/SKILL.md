@@ -10,6 +10,26 @@ Guía automatizada para identificar, crear, validar, traducir y publicar una nue
 
 ---
 
+## 🪟 EJECUCIÓN EN WINDOWS DESDE GIT BASH
+
+El entorno de trabajo usa Git Bash, pero no se debe invocar `gh` ni `npm` a través de los wrappers que intentan resolver WSL 1. Usar siempre los ejecutables nativos con rutas estables:
+
+```bash
+test -f '/mnt/c/Program Files/GitHub CLI/gh.exe'
+test -f 'C:/Users/34677/AppData/Local/nvm/v22.18.0/node.exe'
+test -f 'C:/Users/34677/AppData/Local/nvm/v22.18.0/node_modules/npm/bin/npm-cli.js'
+
+'/mnt/c/Program Files/GitHub CLI/gh.exe' issue list --repo Game-Bob/ai-knows --state open --limit 100 --json number,title,body,labels,comments,createdAt,url
+node.exe 'C:/Users/34677/AppData/Local/nvm/v22.18.0/node_modules/npm/bin/npm-cli.js' run sync
+node.exe 'C:/Users/34677/AppData/Local/nvm/v22.18.0/node_modules/npm/bin/npm-cli.js' run discover
+```
+
+Antes de ejecutar el flujo, comprobar que las rutas existen con `test -f` y que `node.exe --version` responde. Si la versión de Node cambia, localizar la carpeta activa en `C:/Users/34677/AppData/Local/nvm/` y actualizar las dos rutas del bloque juntas. Ejecutar los comandos de npm en una terminal con TTY. No usar `npm run ...` directamente cuando muestre `WSL 1 is not supported` o `Could not determine Node.js install directory`.
+
+Para publicar o crear una issue, reutilizar `'/mnt/c/Program Files/GitHub CLI/gh.exe'`, por ejemplo `'/mnt/c/Program Files/GitHub CLI/gh.exe' issue create ...`; no sustituirlo por un `gh` genérico.
+
+---
+
 ## 🔄 REGLA PRINCIPAL: BACKLOG DE `ai-knows` ANTES QUE DISCOVERY
 
 **Excepción por alcance explícito del usuario:** si el usuario identifica de forma directa una herramienta concreta, aporta su referencia funcional o visual y pide implementarla en un repositorio específico, ese alcance prevalece sobre la selección FIFO del backlog. La issue del backlog se conserva intacta y no se presenta como la oportunidad implementada.
@@ -42,14 +62,16 @@ Los repositorios `jjlmoya-utils-*` ya están descargados como directorios herman
 4. Ignorar los resúmenes ejecutivos, rankings y recomendaciones que aparezcan dentro de esos Markdown. Leer las filas y URLs de detalle para construir una conclusión propia.
 5. Leer los sitemaps para comprobar cobertura por URL, slug, título y categoría. La ausencia de una URL o de una intención equivalente es una señal de hueco, no una prueba suficiente por sí sola.
 6. Contrastar cada posible oportunidad con las filas de intención de búsqueda, su tipo, su categoría y sus señales de repetición o volumen presentes en los datos sincronizados.
-7. Si se usan otros `.md` de `data/notebooklm`, clasificarlos explícitamente como dato primario, contexto o conclusión derivada. Nunca usar un informe de conclusiones como sustituto de las filas de datos.
+7. Inventariar antes de proponer: contar los directorios inmediatos de `src/tool` de cada repositorio hermano `jjlmoya-utils-*`, registrar las categorías presentes en ambos sitemaps y revisar etiquetas abiertas e histórico de oportunidades. Este inventario sirve para corregir el sesgo de volumen y no autoriza a leer implementaciones de otros tools durante la fase de discovery.
+8. Investigar señales externas actuales para las categorías nuevas o emergentes: informes sectoriales, tendencias de producto, cambios regulatorios, comunidades técnicas y fuentes de mercado. Clasificarlas como evidencia externa y no mezclarlas con volumen de búsqueda.
+9. Si se usan otros `.md` de `data/notebooklm`, clasificarlos explícitamente como dato primario, contexto o conclusión derivada. Nunca usar un informe de conclusiones como sustituto de las filas de datos.
 
 ### Fuentes prohibidas como autoridad
 
-- `data/notebooklm/curated-opportunities.md` no se debe usar para elegir, priorizar ni describir una oportunidad.
+- `data/notebooklm/curated-opportunities.md` no se debe usar para elegir, priorizar ni describir una oportunidad. Puede leerse únicamente como registro histórico para marcar una categoría como ya tratada y evitar repetirla en el cupo `NUEVA VERTICAL`.
 - `data/notebooklm/curated-social-leads.md`, `data/notebooklm/social-opportunities.md` y `data/notebooklm/social-traffic-outreach.md` no se deben usar como fuente principal de demanda de búsqueda.
 - No asumir que una oportunidad sigue abierta porque aparezca en un informe anterior. La sincronización actual y el sitemap tienen prioridad.
-- No inspeccionar repositorios `jjlmoya-utils-*`, `jjlmoya` ni `website` para decidir si existe un hueco. La skill de nueva herramienta solo debe sugerir; la validación del repositorio ocurre después, fuera de esta fase.
+- No inspeccionar la implementación interna de repositorios `jjlmoya-utils-*`, `jjlmoya` ni `website` para decidir si existe un hueco. La única excepción durante discovery es el inventario superficial obligatorio de nombres de repositorios y cantidad de directorios inmediatos de `src/tool`, necesario para formar el carril de baja cobertura. La validación funcional del repositorio ocurre después, fuera de esta fase.
 
 ### Resultado mínimo de la sugerencia
 
@@ -60,19 +82,31 @@ Cuando hay issues abiertas, no presentar tres oportunidades nuevas ni justificar
 - el alcance que se va a implementar;
 - dependencias, riesgos y criterio de cierre.
 
-Solo cuando no haya issues abiertas de utilidad se aplica el formato de tres opciones comparables:
+Solo cuando no haya issues abiertas de utilidad se aplica el formato de veinte opciones comparables:
 
-Antes de implementar, entregar tres opciones comparables basadas en evidencia y señalar cuál se recomienda:
+Antes de implementar, entregar exactamente veinte opciones comparables, divididas en dos carriles obligatorios:
+
+- **Carril de exploración de baja cobertura: 10 ideas.** Nueve ideas, una por cada una de las nueve verticales públicas existentes con menos directorios `src/tool`, más una décima idea obligatoria para una vertical nueva ausente del inventario actual. No se permite repetir categoría en este carril ni ordenar por volumen de búsquedas. Los repositorios de infraestructura, plantillas o limpieza interna no cuentan como verticales públicas. Cada ficha debe mostrar el número de tools encontrado y explicar por qué la utilidad tiene sentido aunque la categoría tenga poca cobertura.
+- **Carril de demanda y tendencias: 10 ideas.** Ideas elegidas con los criterios actuales: familias de consultas, repetición, cobertura del sitemap, tendencia externa, utilidad recurrente, diferenciación y complejidad.
+- **Vertical nueva obligatoria:** la décima idea del carril de exploración debe pertenecer a una categoría que no aparezca en ningún repositorio `jjlmoya-utils-*`, ningún sitemap, ninguna issue abierta y ningún bloque histórico de `data/notebooklm/curated-opportunities.md`. Debe proponerse como nuevo `jjlmoya-utils-<categoría>` y llevar la marca `NUEVA VERTICAL`. No se puede sustituir por una categoría existente con otro nombre.
+- **Definición estricta de vertical nueva:** una vertical nueva es un dominio de problemas, usuarios y tareas que queda fuera de la órbita temática actual del ecosistema y exige crear un repositorio funcional nuevo. No es una rama, subcategoría, renombrado, cambio de audiencia, nueva interfaz ni ampliación de una vertical existente. Si la utilidad se puede describir de forma natural como una herramienta de `nature`, `health`, `hardware`, `pets`, `finance`, `games`, `cooking` o cualquier otra categoría ya presente, debe entrar en ese repositorio existente y no puede ocupar el cupo `NUEVA VERTICAL`. Por ejemplo, jardinería, huertos, riego y lluvia para plantas pertenecen a `nature`, aunque no exista todavía una herramienta concreta.
+- **Prueba de frontera para la vertical nueva:** antes de redactarla, responder por escrito: (1) cuál es el dominio independiente; (2) qué usuario y trabajo recurrente nuevo introduce; (3) por qué no sería razonable clasificarla en ningún repositorio actual; (4) qué repositorio nuevo `jjlmoya-utils-<categoría>` necesitaría; y (5) qué evidencia externa actual demuestra que el dominio merece existir. Si alguna respuesta es "se puede añadir a una categoría existente", rechazar la propuesta como vertical nueva y buscar otra de verdad disruptiva. La ausencia de una herramienta concreta no demuestra que exista una vertical nueva.
+- **Coste de diseño de museos y patrimonio:** no presentar `museums`, `heritage` ni una vertical equivalente como opción ligera o de bajo mantenimiento. Suelen exigir diseño espacial y editorial específico, recorridos, catalogación, conservación, accesibilidad y muchos estados visuales por institución. Solo se podrán proponer con un alcance mínimo explícitamente aprobado por el usuario y una estimación separada de diseño, contenido y mantenimiento.
+- Si la vertical nueva no puede demostrarse con evidencia externa y una ficha de utilidad concreta, detener la sugerencia y declarar el bloqueo; nunca rellenar ese cupo con otra categoría conocida.
+- Esta obligación se aplica a cada ejecución que entre en discovery. No rompe la regla FIFO: si existe una issue abierta de utilidad, se trabaja esa issue y no se presenta una tanda de ideas nueva.
+
+Cada una de las veinte fichas debe incluir:
 
 - oportunidad y slug propuesto para cada opción;
-- categoría inferida desde los datos;
+- categoría inferida desde los datos, número actual de tools y marca `NUEVA VERTICAL` cuando aplique;
 - consultas o familias de consultas observadas, citadas literalmente desde el informe sincronizado;
 - cobertura encontrada en los sitemaps y por qué no satisface la intención;
+- señal externa actual cuando exista, con fuente y fecha;
 - propuesta de valor, entradas, cálculo o transformación y resultado esperado;
-- fricción de uso, complejidad técnica y límites de cada opción;
-- recomendación final explicando por qué gana una opción y por qué se descartan las otras dos.
+- fricción de uso, complejidad técnica, límites y riesgo de canibalización;
+- recomendación final separada para cada carril y una recomendación global explicando qué evidencia la sostiene.
 
-No copiar el ranking ni la narrativa de otro informe. Las tres propuestas deben poder reconstruirse desde las filas de búsqueda y las URLs del sitemap.
+No copiar rankings ni narrativas de otros informes. Las veinte propuestas deben poder reconstruirse desde las filas de búsqueda, las URLs del sitemap, el inventario de tools y, para la vertical nueva, las señales externas documentadas.
 
 ---
 
@@ -87,13 +121,12 @@ No copiar el ranking ni la narrativa de otro informe. Las tres propuestas deben 
 ### Fase 1: Identificación e Inspiración cuando el backlog está vacío
 1. Ejecutar primero la consulta de issues abiertas descrita en la regla principal. Solo si no hay ninguna issue abierta de utilidad, sincronizar los datos con `npm run sync` y después con `npm run discover`. Si cualquiera de las sincronizaciones falla, informar del fallo y no presentar una oportunidad como actual.
 2. Analizar las tablas de detalle de `global-suggest-engine.md` junto con `gamebob.dev-sitemap.md` y `jjlmoya.es-sitemap.md`. Usar otros Markdown solo para contexto trazable y nunca para repetir conclusiones.
-3. Si el backlog está vacío, proponer tres herramientas candidatas al usuario especificando:
-   - Nombre de la utilidad y categoría objetivo (`jjlmoya-utils-<categoría>`).
-   - Intención de búsqueda SEO y propuesta de valor única.
-   - Presets predefinidos y conceptos visuales.
-4. Si el usuario acepta una de las candidatas, crear primero su issue en `Game-Bob/ai-knows` con la etiqueta `repo:jjlmoya-utils-<categoría>` y esperar a una ejecución posterior del loop. No iniciar la Fase 2 en esta misma ejecución.
+3. Si el backlog está vacío, construir y presentar los dos carriles de diez ideas definidos arriba. El primer carril debe calcularse por número real de directorios `src/tool` para sus nueve verticales existentes, no por impresiones ni por volumen de búsquedas, y reservar el décimo cupo a una categoría nueva. El segundo puede usar volumen, repetición y tendencias.
+4. Dentro del primer carril, seleccionar y marcar obligatoriamente una vertical nueva no tratada. Para demostrar que está sin tratar, comprobar repositorios hermanos, sitemaps, issues abiertas e histórico curado antes de redactarla.
+5. Cada idea debe especificar nombre, categoría objetivo (`jjlmoya-utils-<categoría>`), por qué crearla, intención o señal externa, inputs, transformación, resultado, cobertura, límites, complejidad y presets o concepto visual.
+6. Si el usuario acepta una de las candidatas, crear primero su issue en `Game-Bob/ai-knows` con la etiqueta `repo:jjlmoya-utils-<categoría>` y esperar a una ejecución posterior del loop. No iniciar la Fase 2 en esta misma ejecución.
 
-5. Cuando se haya seleccionado una issue existente, resolver antes de implementar las preguntas reales de la ficha de oportunidad:
+7. Cuando se haya seleccionado una issue existente, resolver antes de implementar las preguntas reales de la ficha de oportunidad:
    - **¿Por qué crear esta herramienta?** Explicar la demanda real, el problema recurrente que resuelve y por qué no está cubierto por las herramientas actuales de la categoría.
    - **¿Cómo gestionarla e implementarla?** Definir explícitamente las entradas requeridas, la lógica de cálculo y fórmulas, y la experiencia de usuario y visualización.
    - Dentro de la experiencia de usuario y visualización, definir además la identidad artística, la metáfora visual y el detalle distintivo que convierten la TOOL en una pieza de museo usable.
@@ -151,6 +184,16 @@ Ejecutar secuencialmente y verificar código de salida 0:
 2. `npm run lint`
 3. `npm run test`
 4. `npm run build`
+
+### Gate obligatorio de contrato con consumidores
+Antes de hacer commit, `npm run minor` o publicar una TOOL, validar la integración contra los dos consumidores reales (`../jjlmoya` y `../website`):
+
+1. Leer sus layouts/rutas de librería y comprobar la firma efectiva de `Component`, `SEOComponent` y `BibliographyComponent`; no inferir el contrato solo desde los tipos de la librería.
+2. Ejecutar una prueba de prerender de al menos una ruta de la TOOL en cada consumidor y en un locale no español. Para `SEOComponent`, el contrato estándar del ecosistema es recibir `{ locale }`, cargar `entry.i18n[locale]` y pasar `{ locale, sections: content.seo }` a `SEORenderer`; no declarar `{ content }` salvo que ambos consumidores lo pasen explícitamente.
+3. Añadir o actualizar una regresión en la librería que cubra este contrato de loader/render, y volver a ejecutar tests y build después del cambio.
+4. Tras el `minor` y la publicación, instalar la versión exacta en ambos consumidores mediante sus scripts oficiales, confirmar que `package.json`, lockfile y `node_modules` resuelven esa misma versión, y repetir el smoke build. No cerrar la tarea con la librería corregida pero los consumidores todavía apuntando a la versión rota.
+
+Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incompleta y documentar el bloqueo; nunca presentar solo el build aislado de la librería como integración validada.
 
 ### Fase 5: Publicación, Sincronización e Imágenes OpenGraph
 1. Commit y push inicial de la librería en `/d/code/jjlmoya-utils-<categoria>`.
@@ -265,11 +308,30 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - Cuando una TOOL use tokens `--n-*`, aislar sus variables dentro de la card raíz de la propia TOOL además de declarar la paleta base, para evitar colisiones con tokens globales del proyecto consumidor. En modo oscuro, revisar también el contraste de etiquetas colocadas sobre ilustraciones o formas de color.
     - Si el usuario detecta una interfaz clonada, un contenedor sobredimensionado o sombras exteriores exageradas, detener el gate visual y hacer tres pasadas explícitas: adelgazar el cromo, redefinir la metáfora visual desde el problema y revisar la jerarquía de contenido y SEO. No solicitar `okQA` hasta comprobar el render tras las tres pasadas.
     - Si los presets parecen botones flotantes o la herramienta se percibe como paneles desconectados, agruparlos dentro de una única card estructural con separadores internos y revisar el render antes de continuar.
+    - Si el usuario detecta que onboarding, configuración y resultado aparecen como tres cards independientes, unirlos en una única superficie estructural con separadores internos claros y volver a revisar el render.
+    - Nunca usar `window.alert`, `window.confirm` ni diálogos nativos equivalentes en una TOOL: sustituirlos por mensajes inline o una confirmación propia, animada, accesible y coherente con la identidad visual.
     - Cuando una vista Astro genere filas, opciones u otro HTML dinámico como cadena, insertar la cadena explícitamente con `set:html` o construir nodos tipados; nunca interpolarla como texto, porque el render puede mostrar las etiquetas HTML al usuario.
     - En cualquier TOOL de temperatura, mostrar el símbolo `°` junto a cada unidad y ofrecer un conmutador global visible entre `Metric °C` e `Imperial °F`; inputs, rangos, resultados, tablas, estado persistido y etiquetas deben cambiar sin alterar la temperatura física subyacente.
     - Si el usuario identifica un negro verdoso o lavado en el tema oscuro, redefinir la paleta hacia negros carbón reales y reservar los tonos verdes para reflejos o estados funcionales; volver a revisar contraste y render antes del gate visual.
+    - En escenas SVG de hidratación de mascotas, no usar siluetas decorativas de perro o gato como protagonista: la metáfora debe centrarse en el recipiente y su nivel. El texto colocado sobre el agua debe usar un token de tinta específico del recipiente y verificarse en tema claro y oscuro.
+    - El tono de fondo no es un valor fijo del ecosistema: cada TOOL puede elegir fondos distintos para su identidad, y el tema claro y oscuro pueden usar superficies de base diferentes entre sí. Revisar siempre la relación entre fondo, card, escena y resultado; no repetir automáticamente el mismo fondo de otra TOOL.
     - Si una captura muestra una calculadora como dashboard oscuro genérico, una metáfora que solo adorna el formulario, una cifra principal que rompe sus unidades, o un badge que no coincide con el preset activo, detener la presentación y rehacer composición, tipografía, formato de cifras y estados antes de continuar.
+    - Si una escena de resultados queda mucho más corta que la columna de interpretación y deja un hueco vacío, reordenar las métricas relacionadas junto a la escena o convertir la composición en una superficie equilibrada; no resolverlo con espacio en blanco artificial ni con una tarjeta estirada sin contenido.
     - Verificar que la etiqueta `repo:jjlmoya-utils-*` coincide con la categoría funcional de la oportunidad; si no coincide, corregir la etiqueta y la referencia de repositorio de la issue antes de seleccionar la implementación.
+    - Si el usuario rechaza el tono verde de una TOOL de mapas, no insistir en verdes como fondo dominante ni resolver el problema con cambios cosméticos: redefinir la paleta desde papel, tinta, terracota, agua y tierras legibles, y eliminar los puntos decorativos sin significado.
+    - Si el usuario detecta que el gráfico principal comunica poco, hacer que la escena visual pague su espacio: aumentar la densidad de señales interpretables, marcar eventos que expliquen la divergencia y dar al resultado una jerarquía mayor. Eliminar bloques introductorios o leyendas explicativas que no aporten una decisión nueva, y retirar textos auxiliares pegados a controles cuando vuelvan la interacción agobiante; la explicación debe quedar en el resultado o en el contenido SEO.
+    - En generadores de pueblos o asentamientos, los edificios deben leerse como un tejido urbano reconocible con casas, tejados, plazas, caminos y servicios; una nube de rectángulos conectados por puntos no supera el gate visual.
+    - Las semillas de generadores de asentamientos deben ofrecer nombres de pueblo compuestos, variados y memorables, con suficientes combinaciones para evitar una lista corta repetitiva.
+    - La edición de mapas de asentamientos debe ofrecer click derecho contextual sobre el mapa con herramientas y acciones visibles; el usuario no debe depender únicamente de seleccionar un modo global y después adivinar dónde clicar.
+    - Compartir por enlace en una herramienta de mapas debe reconstruir el pueblo completo, incluyendo semilla, configuración, edificios, servicios, caminos, agua y ediciones manuales; compartir solo la configuración no es suficiente.
+    - En una tool de mapas, la barra de herramientas debe cubrir el trabajo real de preparación: selección, construcción y eliminación de edificios, caminos, agua y servicios, además de exportación y recuperación del estado compartido.
+    - Las listas de servicios de una tool de asentamientos deben poder crecer reactivamente con nombres personalizados, conservarse en el estado compartido y alimentar los controles, leyenda y marcadores sin una lista fija cerrada.
+    - Los marcadores de servicios nunca deben depender solo de la primera letra: calcular el prefijo mínimo único a partir del nombre visible del idioma activo, actualizarlo al añadir servicios y resolver duplicados de forma legible y rápida.
+    - En mapas de pueblos, el asentamiento es una lectura secundaria dentro del paisaje: el bosque o terreno debe dominar la escena y la trama urbana debe mantener aire alrededor.
+    - Los presets hamlet, village y town deben cambiar de forma reactiva el número de casas, los servicios básicos y el patrón urbano; no son solo tres tamaños de lienzo.
+    - La generación urbana debe partir de parcelas y calles conectadas con una cuadrícula legible, relajándola progresivamente para village y hamlet sin convertirla en una nube apiñada.
+    - Las carreteras deben representarse como una red topológica de celdas y cruces, con uniones limpias cuando coincidan tres o cuatro tramos.
+    - El agua pintada celda a celda debe recomponerse por componentes adyacentes: un tramo estrecho se lee como río, tres celdas como laguna y cuatro o más como lago o masa continua.
 
 14. **Separación estricta entre TOOL y widget**:
     - `title`, `description`, `slug`, FAQ, HowTo y SEO pertenecen a `ToolLocaleContent` y a los componentes de página. Nunca duplicar `title` o `description` dentro de `ui.ts`, `component.astro` o el widget interactivo.
@@ -295,6 +357,7 @@ Ejecutar secuencialmente y verificar código de salida 0:
     - De otros tools solo se pueden leer contratos: `entry.ts`, `index.ts`, `tools.ts`, `entries.ts`, `types.ts`, tests de conteo, schemas, i18n shape, eslint y stylelint.
     - La escena, los controles y el resultado deben ser la respuesta a ESTA ficha: qué cuenta el usuario, qué ve, qué toca. Si la interfaz funcionaría igual cambiando las etiquetas, está mal.
     - Antes de programar, escribir en una frase la metáfora que solo tiene sentido para esta TOOL. Si la frase sirve para una cadena de bici, un LED o un resistor, tirarla y empezar otra.
+    - Prohibido reconstruir de memoria el cromo habitual aunque no se abra otra TOOL: conmutador Metric/Imperial en mast, escena SVG decorativa, tablero de labels+inputs, fila de chips/swatches y una tarjeta de resultado flotante. Ese esqueleto produce la misma herramienta con otro dibujo y no supera la auditoria.
 
 17. **Estándar de producción sin placeholders**:
     - Todo lo que se cree bajo esta skill está destinado a producción. No usar placeholders, texto de relleno, preguntas numeradas sin significado, lorem ipsum, valores ficticios ni estructuras sintéticas para satisfacer tests.
@@ -382,3 +445,4 @@ Ejecutar secuencialmente y verificar código de salida 0:
 
 33. **SEO y contenido con criterio editorial**:
     - El texto SEO no puede ser una extensión genérica de la interfaz ni repetir etiquetas, advertencias o fórmulas sin enseñar una decisión del dominio. Cada bloque debe aportar contexto, interpretación, límites o una acción concreta que el usuario pueda aplicar.
+    - Si el usuario considera pobre el SEO de una TOOL, ampliar el contenido con conocimiento del dominio que prepare una decisión: explicar el mecanismo, mostrar un ejemplo numérico, interpretar las señales, aclarar límites y proponer una forma de actuar. No rellenar con resúmenes de controles ni repetir la interfaz.

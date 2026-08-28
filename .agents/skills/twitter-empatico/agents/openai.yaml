@@ -1,0 +1,4 @@
+interface:
+  display_name: "Twitter empático"
+  short_description: "Ayuda en X con empatía, sin spam"
+  default_prompt: "Usa $twitter-empatico para encontrar conversaciones donde pueda ayudar y redactar respuestas humanas."
