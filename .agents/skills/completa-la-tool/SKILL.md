@@ -67,6 +67,19 @@ cd /d/code/website
 node scripts/image-to-webp.mjs <imagen-generada> public/images/utilities/<slug-en>.webp
 ```
 
+### Dirección gráfica obligatoria para imágenes OpenGraph
+
+Antes de generar una imagen, revisar varias imágenes existentes en `public/images/utilities/` de los consumidores para mantener la identidad visual del ecosistema. La referencia compartida es una ilustración conceptual, no una captura de la interfaz:
+
+- Usar siempre lienzo cuadrado `1:1`, fondo de papel marfil o blanco cálido y textura sutil de papel.
+- Construir una única escena central reconocible que explique la utilidad mediante una metáfora visual propia del dominio.
+- Usar tinta dibujada a mano con contornos negros o carbón de grosor variable, manchas, salpicaduras y lavados de acuarela visibles.
+- Elegir una paleta cromática contenida y relacionada con el tema; reservar los colores intensos para la señal principal y mantener suficiente contraste.
+- Mantener aire alrededor de la escena, jerarquía clara y acabado de lámina editorial o cuaderno de campo; evitar composiciones apiñadas.
+- No representar dashboards, formularios, tarjetas, tablas, marcos de aplicación ni interfaces genéricas como imagen principal.
+- No introducir texto dentro de la imagen salvo que sea imprescindible y pueda validarse literalmente; nunca aceptar letras inventadas, marcas de agua ni logotipos.
+- La imagen debe funcionar como concepto incluso sin leer el nombre de la TOOL y debe conservar la legibilidad al convertirse a WebP.
+
 6. Verificar las rutas `public/images/utilities/`, los slugs devueltos por los registros y el resultado final de los consumidores. No crear `public/images/og/` ni convertidores temporales.
 7. Pedir confirmación explícita antes de hacer los commits y pushes finales de `jjlmoya` y `website`. Mantener los mensajes, `--no-verify` y la rama `main` de la skill de origen.
 8. Si existe un issue abierto que originó la TOOL, cerrarlo solo después de disponer de evidencia de implementación, quality gates, publicación y sincronización. Añadir esa evidencia al resumen final.
