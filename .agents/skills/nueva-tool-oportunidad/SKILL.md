@@ -73,6 +73,13 @@ Los repositorios `jjlmoya-utils-*` ya están descargados como directorios herman
 - No asumir que una oportunidad sigue abierta porque aparezca en un informe anterior. La sincronización actual y el sitemap tienen prioridad.
 - No inspeccionar la implementación interna de repositorios `jjlmoya-utils-*`, `jjlmoya` ni `website` para decidir si existe un hueco. La única excepción durante discovery es el inventario superficial obligatorio de nombres de repositorios y cantidad de directorios inmediatos de `src/tool`, necesario para formar el carril de baja cobertura. La validación funcional del repositorio ocurre después, fuera de esta fase.
 
+### Bibliografía internacional y validación de referencias
+
+- La web es internacional: no exigir que todas las referencias estén en inglés ni que procedan de Estados Unidos. Elegir para cada afirmación la fuente más autorizada y pertinente, aunque esté en español, francés, alemán, portugués, italiano, catalán, japonés, árabe u otro idioma.
+- Priorizar organismos oficiales, universidades, asociaciones profesionales y documentación técnica del país o región relevante. Mezclar idiomas y países cuando mejore la cobertura; no traducir ni sustituir una referencia local sólida solo para homogeneizar el idioma.
+- En las bibliografías de los locales, conservar el título original de la fuente cuando sea lo más fiel y añadir traducción solo si ayuda a comprenderla. El inglés es una opción útil cuando la fuente es la mejor disponible, no una obligación editorial.
+- Verificar cada URL antes de incorporarla al código. Si devuelve 404, está obsoleta o redirige a una página genérica, localizar la página oficial equivalente y reemplazarla. No presentar una bibliografía con enlaces rotos.
+
 ### Resultado mínimo de la sugerencia
 
 Cuando hay issues abiertas, no presentar tres oportunidades nuevas ni justificar por qué esta gana a las demás. Presentar:
@@ -279,6 +286,8 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
    - **Turco (`tr.ts`)**: Caracteres turcos auténticos (`ç`, `ğ`, `ı`, `ö`, `ş`, `ü`).
    - **Portugués (`pt.ts`)**: Diacríticos y acentos auténticos (`á`, `â`, `ã`, `à`, `ç`, `é`, `ê`, `í`, `ó`, `ô`, `õ`, `ú`).
 
+   La prueba `diacritics_density.test.ts` solo detecta una densidad mínima de caracteres propios del idioma y no es un corrector ortográfico. Antes de publicar, revisar manualmente cada locale y mantener una regresión específica para los errores ortográficos o de transcripción detectados durante esa revisión.
+
 7. **Basura Tipográfica Prohibida (`no_en_dash.test.ts`)**:
    - Usar EXCLUSIVAMENTE apóstrofe recto ASCII `'`, comillas rectas `"`, guion estándar `-`, tres puntos `...`.
    - NUNCA apóstrofes curvos `’`, comillas latinas `«` `»` ni guiones em `—`/en `–`.
@@ -446,3 +455,4 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 33. **SEO y contenido con criterio editorial**:
     - El texto SEO no puede ser una extensión genérica de la interfaz ni repetir etiquetas, advertencias o fórmulas sin enseñar una decisión del dominio. Cada bloque debe aportar contexto, interpretación, límites o una acción concreta que el usuario pueda aplicar.
     - Si el usuario considera pobre el SEO de una TOOL, ampliar el contenido con conocimiento del dominio que prepare una decisión: explicar el mecanismo, mostrar un ejemplo numérico, interpretar las señales, aclarar límites y proponer una forma de actuar. No rellenar con resúmenes de controles ni repetir la interfaz.
+    - En utilidades simples de uso inmediato, como relojes, contadores o conversores directos, no añadir sellos de privacidad, avisos de funcionamiento local ni mensajes de marketing dentro del widget si no cambian una decisión del usuario. Reservar esas explicaciones para SEO, FAQ o notas de límites cuando aporten contexto funcional, legal o de seguridad.
