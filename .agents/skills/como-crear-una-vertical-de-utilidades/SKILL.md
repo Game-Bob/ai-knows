@@ -25,6 +25,19 @@ npx @jjlmoya/utils-template <category>
 4. Mantén la arquitectura de `tabletop`: Astro estático, TypeScript estricto, Vitest, ESLint, Stylelint, i18n por archivos y registro central de entries/tools.
 5. No registres todavía la nueva categoría en consumidores globales. Eso pertenece al ciclo de publicación posterior a `okQA`.
 
+## Identidad de categoría
+
+El CLI resuelve la parte mecánica, pero no inventa el posicionamiento editorial. Después del bootstrap, audita explícitamente toda la identidad de la vertical:
+
+- El slug canónico debe ser exactamente `<category>` en `src/category/i18n/*.ts`, rutas locales, entries y enlaces internos.
+- `src/category/index.ts` debe exportar la categoría nueva, importar la tool correcta y conservar los loaders de locale válidos.
+- `src/category/<DisplayName>CategorySEO.astro` debe existir, importar la categoría nueva y estar referenciado por `package.json` en `exports["./category-seo"]`.
+- Cada `src/category/i18n/<locale>.ts` debe tener title, description, SEO y estadísticas propias de la vertical; no basta con reemplazar `Tabletop` por el nombre nuevo. Durante English-first se completa `en` y las demás traducciones esperan a `okQA`, pero no se pueden publicar copias heredadas como si fueran definitivas.
+- El texto de categoría debe describir el dominio real, la primera tool, sus límites y la privacidad. Elimina menciones residuales a tabletop, RPG, dados u otra vertical de origen.
+- Comprueba también `src/index.ts`, `src/entries.ts`, `src/tools.ts`, el `package.json` y el lockfile para que no quede ningún identificador de la vertical de origen.
+
+Antes de cerrar el gate, prueba las rutas de categoría y de la primera tool en inglés. Considera el bootstrap correcto solo cuando tanto la estructura como el SEO de categoría sean coherentes; un rename automático de strings no es una revisión SEO.
+
 ## Primera tool
 
 Implementa una única tool de producción con, cuando aplique, estos módulos separados:
