@@ -1,0 +1,4 @@
+interface:
+  display_name: "Como crear una vertical de utilidades"
+  short_description: "Crea verticales modernas desde el template tabletop"
+  default_prompt: "Usa $como-crear-una-vertical-de-utilidades para crear una vertical completa y lista para QA."
