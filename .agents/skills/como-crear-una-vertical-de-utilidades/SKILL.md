@@ -15,7 +15,7 @@ El punto de partida es `@jjlmoya/utils-template`, reconstruido desde `jjlmoya-ut
 npx @jjlmoya/utils-template <category>
 ```
 
-`<category>` debe ser kebab-case, por ejemplo `books`, `demography` o `performing-arts`. El comando prepara `../jjlmoya-utils-<category>`, renombra el paquete y la categoría, inicializa `main`, crea el repositorio público `Game-Bob/jjlmoya-utils-<category>` y hace el primer push. Si el paquete aún no está publicado, detén el flujo y resuelve la disponibilidad del paquete antes de inventar un bootstrap alternativo.
+`<category>` debe ser kebab-case, por ejemplo `books`, `demography` o `performing-arts`. El comando prepara `../jjlmoya-utils-<category>`, renombra el paquete y la categoría, inicializa `main`, crea el repositorio privado `Game-Bob/jjlmoya-utils-<category>` y hace el primer push. Todas las nuevas verticales deben permanecer privadas durante el desarrollo, el gate `okQA` y la preparación de publicación. Si el paquete aún no está publicado, detén el flujo y resuelve la disponibilidad del paquete antes de inventar un bootstrap alternativo.
 
 ## Preparación de la vertical
 
