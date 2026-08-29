@@ -32,7 +32,7 @@ El CLI resuelve la parte mecánica, pero no inventa el posicionamiento editorial
 - El slug canónico debe ser exactamente `<category>` en `src/category/i18n/*.ts`, rutas locales, entries y enlaces internos.
 - `src/category/index.ts` debe exportar la categoría nueva, importar la tool correcta y conservar los loaders de locale válidos.
 - `src/category/<DisplayName>CategorySEO.astro` debe existir, importar la categoría nueva y estar referenciado por `package.json` en `exports["./category-seo"]`.
-- Cada `src/category/i18n/<locale>.ts` debe tener title, description, SEO y estadísticas propias de la vertical; no basta con reemplazar `Tabletop` por el nombre nuevo. Durante English-first se completa `en` y las demás traducciones esperan a `okQA`, pero no se pueden publicar copias heredadas como si fueran definitivas.
+- Cada `src/category/i18n/<locale>.ts` debe tener title, description, SEO y estadísticas propias de la vertical; no basta con reemplazar `Tabletop` por el nombre nuevo. Durante English-first se conserva únicamente `src/category/i18n/en.ts`: elimina los otros archivos, reduce el registro y genera solo la ruta `/en`. Las traducciones y sus comprobaciones de cobertura esperan a `okQA`; no se pueden publicar copias heredadas como si fueran definitivas.
 - El texto de categoría debe describir el dominio real, la primera tool, sus límites y la privacidad. Elimina menciones residuales a tabletop, RPG, dados u otra vertical de origen.
 - Comprueba también `src/index.ts`, `src/entries.ts`, `src/tools.ts`, el `package.json` y el lockfile para que no quede ningún identificador de la vertical de origen.
 
