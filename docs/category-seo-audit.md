@@ -37,6 +37,7 @@ Las categorías rojas no se han ocultado ni exceptuado: el test conserva el defe
 - Mejora de categoría tabletop y publicación de la plantilla como `v1.1.0`.
 - Corrección del reexport público y del QA TypeScript de language; publicado como `v1.6.0`.
 - Corrección de conflicto de nombres en aquarium y publicación como `v1.54.0`.
+- Corrección SEO de bike y publicación como `v1.34.0`.
 - Publicación de books (`v1.3.0`), health (`v1.43.0`), forensic-science (`v1.15.0`) y motor (`v1.6.0`) con sus tests de categoría.
 - Calibración del detector para no confundir `validator`/`validation` con una promesa de validación.
 
