@@ -57,7 +57,8 @@ Ejecutar las acciones en este orden, usando únicamente los scripts oficiales in
 2. Pedir confirmación explícita justo antes de hacer `git add`, `git commit` y `git push` de la librería `jjlmoya-utils-<categoría>`. Usar el mensaje y `--no-verify` definidos por la skill de origen.
 3. Ejecutar `npm run minor` en la librería después de que el commit inicial se haya publicado.
 4. Actualizar los consumidores con `npm run update <categoría>` en `/d/code/jjlmoya` y `/d/code/website`.
-5. Generar la imagen OpenGraph conceptual con la capacidad de generación disponible, estilo `Artist Ink and Watercolor` y formato cuadrado `1:1`. Convertirla únicamente con los scripts oficiales:
+   En los consumidores no ejecutar `npm run build`, `npm run test` ni otros builds o tests: no son necesarios para completar la TOOL. La validación del consumidor se limita a comprobar que la dependencia queda actualizada, que el runtime/adaptador de la TOOL se genera correctamente y que los assets y registros apuntan a las rutas esperadas.
+5. Generar la imagen OpenGraph conceptual con la capacidad de generación disponible, formato cuadrado `1:1` y el mismo lenguaje visual del ecosistema. Antes de crearla, revisar varias imágenes existentes en `public/images/utilities/`, seleccionar referencias cercanas por categoría y describir sus rasgos comunes en el prompt. No imponer un estilo nominal como `Artist Ink and Watercolor`: el estilo debe derivarse de las referencias reales y mantenerse coherente con ellas. La convención de assets es estricta: `jjlmoya` usa únicamente el slug español (`<slug-es>.webp`) y nunca debe recibir la imagen del slug inglés; `website` usa únicamente el slug inglés (`<slug-en>.webp`). Convertirla únicamente con los scripts oficiales:
 
 ```bash
 cd /d/code/jjlmoya
@@ -69,19 +70,19 @@ node scripts/image-to-webp.mjs <imagen-generada> public/images/utilities/<slug-e
 
 ### Dirección gráfica obligatoria para imágenes OpenGraph
 
-Antes de generar una imagen, revisar varias imágenes existentes en `public/images/utilities/` de los consumidores para mantener la identidad visual del ecosistema. La referencia compartida es una ilustración conceptual, no una captura de la interfaz:
+La imagen debe mantener la identidad visual del ecosistema a partir de referencias reales de `public/images/utilities/` de los consumidores. La referencia compartida es una ilustración conceptual, no una captura de la interfaz. El agente debe adaptar estas reglas a los rasgos observados y no sustituir esa revisión por un preset de estilo:
 
-- Usar siempre lienzo cuadrado `1:1`, fondo de papel marfil o blanco cálido y textura sutil de papel.
+- Usar siempre lienzo cuadrado `1:1` y conservar el tipo de fondo, textura y tratamiento de superficie que predomine en las referencias elegidas.
 - Construir una única escena central reconocible que explique la utilidad mediante una metáfora visual propia del dominio.
-- Usar tinta dibujada a mano con contornos negros o carbón de grosor variable, manchas, salpicaduras y lavados de acuarela visibles.
-- Elegir una paleta cromática contenida y relacionada con el tema; reservar los colores intensos para la señal principal y mantener suficiente contraste.
-- Mantener aire alrededor de la escena, jerarquía clara y acabado de lámina editorial o cuaderno de campo; evitar composiciones apiñadas.
+- Reproducir el medio, los contornos, la textura, el nivel de detalle y el tipo de acabado que compartan las referencias, sin convertirlo automáticamente en acuarela, tinta o cualquier otro estilo con nombre.
+- Elegir una paleta cromática contenida y relacionada con el tema, respetando la paleta dominante de las referencias y reservando los colores intensos para la señal principal.
+- Mantener el mismo equilibrio de aire, jerarquía y densidad visual que las referencias; evitar composiciones apiñadas.
 - No representar dashboards, formularios, tarjetas, tablas, marcos de aplicación ni interfaces genéricas como imagen principal.
 - No introducir texto dentro de la imagen salvo que sea imprescindible y pueda validarse literalmente; nunca aceptar letras inventadas, marcas de agua ni logotipos.
 - La imagen debe funcionar como concepto incluso sin leer el nombre de la TOOL y debe conservar la legibilidad al convertirse a WebP.
 
-6. Verificar las rutas `public/images/utilities/`, los slugs devueltos por los registros y el resultado final de los consumidores. No crear `public/images/og/` ni convertidores temporales.
-7. Pedir confirmación explícita antes de hacer los commits y pushes finales de `jjlmoya` y `website`. Mantener los mensajes, `--no-verify` y la rama `main` de la skill de origen.
+6. Verificar las rutas `public/images/utilities/`, los slugs devueltos por los registros y el resultado de la integración mínima de los consumidores. Revisar también los CSS que genere el `postinstall` para la TOOL y asegurarse de que se incluyen en el commit final de cada consumidor; si el CSS generado falta, la TOOL no está lista porque puede publicarse rota. No ejecutar builds ni tests de `/d/code/jjlmoya` o `/d/code/website`; no crear `public/images/og/` ni convertidores temporales.
+7. Pedir confirmación explícita antes de hacer los commits y pushes finales de `jjlmoya` y `website`. Antes de cada commit, comprobar el diff y hacer `git add` también de los CSS generados por `postinstall`, junto con la dependencia, los registros/adaptadores y el asset OpenGraph. Mantener los mensajes, `--no-verify` y la rama `main` de la skill de origen.
 8. Si existe un issue abierto que originó la TOOL, cerrarlo solo después de disponer de evidencia de implementación, quality gates, publicación y sincronización. Añadir esa evidencia al resumen final.
 
 Si una acción de publicación falla, conservar el estado y diagnosticarlo; no repetir `npm run minor` ni crear otro release a ciegas. Si la generación de imagen no está disponible, detenerse antes de afirmar que la TOOL está completa y explicar el bloqueo.

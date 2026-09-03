@@ -1,0 +1,4 @@
+interface:
+  display_name: "Informe Build In Public"
+  short_description: "Redacta updates reales y cercanos para ForoCoches"
+  default_prompt: "Prepara mi próxima actualización de build in public para ForoCoches con datos reales, un ángulo claro y un plan de imágenes. Pregúntame solo lo que falte."

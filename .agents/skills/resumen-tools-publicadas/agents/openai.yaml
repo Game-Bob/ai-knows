@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resumen de tools publicadas"
+  short_description: "Resume tools por fecha y evolución"
+  default_prompt: "Usa $resumen-tools-publicadas para preparar un resumen cronológico de las tools publicadas."

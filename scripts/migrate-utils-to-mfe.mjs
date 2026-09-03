@@ -199,6 +199,19 @@ const pageTransform = (relativePath, content) => {
       .replaceAll('ALL_ENTRIES', 'ALL_TOOLS')
       .replaceAll('ALL_TOOLS.map(async (entry)', 'ALL_TOOLS.map(async ({ entry })');
   }
+  if (relativePath === 'src/pages/mfe-sitemaps/[locale]/[vertical]/sitemap.xml.ts') {
+    transformed = transformed.replace(
+      'ALL_ENTRIES[index - 1], alternateLocale',
+      'ALL_ENTRIES[index - 1]!, alternateLocale',
+    );
+  }
+  // Some legacy components kept a wider locale union than the MFE supports.
+  // The runtime check only needs string membership, so do not type that list
+  // as the narrower UtilityLocale union.
+  transformed = transformed.replace(
+    /supportedLangs: KnownLocale\[\]/g,
+    'supportedLangs: string[]',
+  );
   transformed = transformed.replaceAll(
     'relatedTools?: { title: string; description: string; href: string }[];',
     'relatedTools?: { icon: string; title: string; description: string; href: string }[];',
@@ -238,19 +251,42 @@ const plannedWrites = templateFiles.map((path) => join(targetRoot, path));
 const plannedDeletes = filesToDelete.map((path) => join(targetRoot, path));
 
 const civicTypesPath = join(targetRoot, 'src', 'types.ts');
-const civicTypes = read(civicTypesPath);
+// Older verticals use CRLF and declare KnownLocale as a literal union, while
+// newer ones already import UtilityLocale. Normalize both forms before
+// applying the migration so the codemod does not depend on line endings.
+const civicTypes = read(civicTypesPath).replaceAll('\r\n', '\n');
 const modernTypes = civicTypes
   .replace(/import type \{ UtilityLocale \} from '@jjlmoya\/utils-shared\/routing';\n/g, '')
   .replace(
     "import type { SEOSection } from '@jjlmoya/utils-shared';",
     "import type { SEOSection } from '@jjlmoya/utils-shared';\nimport type { UtilityLocale } from '@jjlmoya/utils-shared/routing';",
   ).replace(
-  /export type KnownLocale =([\s\S]*?);\n\nexport interface FAQItem/,
-  'export type KnownLocale = UtilityLocale;\n\nexport interface FAQItem',
+  /export type KnownLocale =[\s\S]*?;\s*(?=export interface FAQItem)/,
+  "export type KnownLocale = UtilityLocale;\n\n",
+  )
+  .replaceAll(
+    'TUI extends object = any',
+    'TUI extends object = Record<string, string>',
+  )
+  .replaceAll(
+    'TUI extends Record<string, string> = Record<string, string>',
+    'TUI extends object = Record<string, string>',
+  )
+  .replaceAll(
+    'TUI extends Record<string, string>',
+    'TUI extends object',
+  )
+  .replaceAll(
+    'entry: AlcoholToolEntry<Record<string, string>>;',
+    'entry: AlcoholToolEntry<object>;',
+  )
+  .replace(
+    /entry: AlcoholToolEntry(?:<Record<string, string>>)?;/g,
+    'entry: AlcoholToolEntry<object>;',
   );
 
 if (!modernTypes.includes("import type { UtilityLocale } from '@jjlmoya/utils-shared/routing';")
-  || !modernTypes.includes('export type KnownLocale = UtilityLocale;')) {
+  || !modernTypes.includes('export type KnownLocale = UtilityLocale')) {
   fail('could not modernize src/types.ts safely');
   process.exit();
 }
@@ -363,6 +399,16 @@ const actions = [];
 const addWrite = (path, content) => actions.push({ type: 'write', path, content });
 const addDelete = (path) => actions.push({ type: 'delete', path });
 
+const sourceFiles = (directory, files = []) => {
+  if (!existsSync(directory)) return files;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) sourceFiles(path, files);
+    else if (/\.(astro|ts|tsx|js|mjs)$/.test(entry.name)) files.push(path);
+  }
+  return files;
+};
+
 for (const relativePath of templateFiles) {
   const source = join(referenceRoot, relativePath);
   if (!existsSync(source)) {
@@ -378,6 +424,47 @@ addWrite(targetPackagePath, `${JSON.stringify(modernPackage, null, 4)}\n`);
 addWrite(join(targetRoot, 'wrangler.jsonc'), `${JSON.stringify(productionWrangler, null, 4)}\n`);
 addWrite(join(targetRoot, 'wrangler.staging.jsonc'), `${JSON.stringify(stagingWrangler, null, 4)}\n`);
 for (const relativePath of filesToDelete) addDelete(join(targetRoot, relativePath));
+
+// Legacy components sometimes use KnownLocale only as a runtime list of URL
+// prefixes. Rewrite those declarations in the target source as well, so the
+// generated 15-locale MFE type does not need to be widened with old aliases.
+for (const sourcePath of sourceFiles(join(targetRoot, 'src'))) {
+  if (plannedWrites.includes(sourcePath)) continue;
+  const source = read(sourcePath);
+  const normalizedPath = relative(targetRoot, sourcePath).replaceAll('\\', '/');
+  const toolMatch = normalizedPath.match(/^src\/tool\/([^/]+)\/(entry|i18n\/[^/]+)\.ts$/);
+  const uiPath = toolMatch ? join(targetRoot, 'src', 'tool', toolMatch[1], 'ui.ts') : undefined;
+  const uiType = uiPath && existsSync(uiPath)
+    ? read(uiPath).match(/export (?:interface|type) (\w+UI)\b/)?.[1]
+    : undefined;
+  let transformedSource = source.replace(/supportedLangs: KnownLocale\[\]/g, 'supportedLangs: string[]');
+  if (uiType && toolMatch?.[2] === 'entry') {
+    transformedSource = transformedSource
+      .replace(
+        /import type \{ AlcoholToolEntry<\w+UI>, ToolLocaleContent \}/g,
+        'import type { AlcoholToolEntry, ToolLocaleContent }',
+      )
+      .replace(
+        /(:\s*)AlcoholToolEntry(?!\s*<)/g,
+        `$1AlcoholToolEntry<${uiType}>`,
+      )
+      .replace(
+        /(as unknown as\s+)AlcoholToolEntry(?!\s*<)/g,
+        `$1AlcoholToolEntry<${uiType}>`,
+      )
+      .replace(
+        /(as unknown as\s+)ToolLocaleContent(?!\s*<)/g,
+        `$1ToolLocaleContent<${uiType}>`,
+      );
+  }
+  if (uiType && toolMatch?.[2].startsWith('i18n/')) {
+    transformedSource = transformedSource.replaceAll(
+      'ToolLocaleContent<Record<string, any>>',
+      `ToolLocaleContent<${uiType}>`,
+    );
+  }
+  if (transformedSource !== source) addWrite(sourcePath, transformedSource);
+}
 
 const missingAssets = [];
 const assetDestination = join(targetRoot, 'public', '_utilities', categoryKey, 'images');

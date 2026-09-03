@@ -69,5 +69,15 @@ npm run editor
 
 Open `http://127.0.0.1:4173`. You can paste a production URL to load its title, OG background and real tool capture automatically. You can also replace the background, tool capture, logo and mascot manually, edit the title, move layers on the canvas, scale them, change the shared colors and download the final PNG. The automatic URL renderer and the visual editor use the same layout presets and brand assets.
 
+## Tools Pulse dashboard
+
+The utility performance data has a local interactive dashboard. It builds its catalog from `../jjlmoya-utils-*` and synchronizes analytics automatically:
+
+```bash
+npm run tools:server
+```
+
+Open `http://127.0.0.1:4173`. Cloudflare is collected in windows of at most seven days and automatic synchronization runs at most once per local day; the button forces a new sync. No monthly CSV is added by hand. See [`data/tools-monthly/README.md`](data/tools-monthly/README.md) for authentication, retention and the optional historical backfill.
+
 ---
 *Don't ask the universe, ask the repo. ai-knows what's going on in GameBob Studio.*

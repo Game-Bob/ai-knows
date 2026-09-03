@@ -46,9 +46,24 @@ Para publicar o crear una issue, reutilizar `'/mnt/c/Program Files/GitHub CLI/gh
 
 Una issue solo deja de ser parte de la cola cuando se implementa y se cierra con evidencia, o cuando se descarta explícitamente como no planificada. No crear issues duplicadas si ya existe una oportunidad equivalente abierta.
 
+### ⛔ GATE OBLIGATORIO DE DUPLICADOS ANTES DE IMPLEMENTAR
+
+Esta skill crea herramientas nuevas. No se usa para ampliar, rediseñar, corregir ni traducir una herramienta que ya existe.
+
+1. Antes de tocar código, comprobar en el repositorio propietario si ya existe la herramienta solicitada o una equivalente: directorio en `src/tool`, registro en `src/tools.ts` y `src/entries.ts`, slug en los sitemaps y issue relacionada.
+2. Si existe, detener la ejecución inmediatamente. No modificar archivos, no añadir tests, no cambiar SEO, no traducir, no crear otra issue y no intentar "mejorarla en su sitio" desde esta skill.
+3. Informar al jefe del error con la issue, el repositorio, la herramienta existente y la evidencia del duplicado. Clasificarla como descartada para este flujo y dejar la modificación para una tarea explícita de mantenimiento o extensión.
+4. Solo continuar cuando se haya verificado que la utilidad no existe y el alcance describe una herramienta nueva, no una ampliación de otra.
+
 ## 🔎 REGLA DE SINCRONIZACIÓN Y SUGERENCIA
 
 La skill debe sugerir oportunidades a partir de datos sincronizados del workspace, no de conclusiones ya empaquetadas por otro informe.
+
+### Lista negra permanente de oportunidades no viables
+
+- Queda bloqueada para siempre la familia de calculadoras, testers, checkers o simuladores de cuello de botella CPU/GPU/RAM, incluyendo variantes como `CPU GPU Bottleneck Calculator`, `CPU vs GPU Bottleneck Calculator`, `PC Bottleneck Calculator`, `CPU/GPU Balance` y cualquier slug equivalente.
+- Ignorar esas filas del suggest engine aunque tengan volumen, no presentarlas en ninguno de los dos carriles, no crear issues para ellas y no implementarlas dentro de esta skill. Un navegador no puede inferir de forma fiable el cuello de botella de un equipo real sin ejecutar benchmarks representativos del workload, y una fórmula genérica produciría ruido y falsas certezas.
+- La familia solo podría volver a considerarse si el usuario solicita explícitamente una herramienta distinta, medible en navegador y con un alcance técnico nuevo; esa petición explícita prevalecería sobre esta lista negra.
 
 ### Ubicación local de los repositorios
 
@@ -73,11 +88,14 @@ Los repositorios `jjlmoya-utils-*` ya están descargados como directorios herman
 - No asumir que una oportunidad sigue abierta porque aparezca en un informe anterior. La sincronización actual y el sitemap tienen prioridad.
 - No inspeccionar la implementación interna de repositorios `jjlmoya-utils-*`, `jjlmoya` ni `website` para decidir si existe un hueco. La única excepción durante discovery es el inventario superficial obligatorio de nombres de repositorios y cantidad de directorios inmediatos de `src/tool`, necesario para formar el carril de baja cobertura. La validación funcional del repositorio ocurre después, fuera de esta fase.
 
-### Bibliografía internacional y validación de referencias
+### Bibliografía internacional obligatoria y validación de referencias
 
-- La web es internacional: no exigir que todas las referencias estén en inglés ni que procedan de Estados Unidos. Elegir para cada afirmación la fuente más autorizada y pertinente, aunque esté en español, francés, alemán, portugués, italiano, catalán, japonés, árabe u otro idioma.
-- Priorizar organismos oficiales, universidades, asociaciones profesionales y documentación técnica del país o región relevante. Mezclar idiomas y países cuando mejore la cobertura; no traducir ni sustituir una referencia local sólida solo para homogeneizar el idioma.
-- En las bibliografías de los locales, conservar el título original de la fuente cuando sea lo más fiel y añadir traducción solo si ayuda a comprenderla. El inglés es una opción útil cuando la fuente es la mejor disponible, no una obligación editorial.
+- La web es internacional y Estados Unidos no es el valor por defecto del ecosistema. Cada TOOL debe tener una bibliografía variada, pertinente y trazable; queda prohibida una bibliografía formada únicamente por fuentes estadounidenses o únicamente por fuentes en inglés.
+- Cada TOOL debe incluir obligatoriamente al menos una fuente primaria cuyo contenido original esté publicado en un idioma distinto del inglés. Una página traducida al español, un título traducido por nosotros o un resumen secundario no cuentan: hay que verificar el idioma original de la página, el PDF o la publicación.
+- Para una TOOL de alcance general, usar al menos dos países o regiones y evitar que una sola institución o país supere la mitad de las referencias, salvo que no exista una autoridad equivalente y se documente la excepción. Para una TOOL limitada a una jurisdicción concreta, conservar la autoridad local para la norma o dato vinculante y añadir la fuente no inglesa para el método, contexto o evidencia general sin usarla para afirmar una regla de otra jurisdicción.
+- Priorizar organismos oficiales, universidades, asociaciones profesionales y documentación técnica del país o región relevante. Mezclar idiomas, países y perspectivas cuando mejore la cobertura; no traducir ni sustituir una referencia local sólida solo para homogeneizar el idioma.
+- En las bibliografías de los locales, conservar el título original de cada fuente cuando sea lo más fiel y añadir una traducción breve solo si ayuda a comprenderla. El inglés es una opción útil cuando la fuente es la mejor disponible, no una obligación editorial ni el idioma de relleno.
+- En `bibliography.ts`, registrar internamente durante la implementación el país o región, el idioma original y la afirmación concreta que respalda cada entrada. Si no se puede justificar esa trazabilidad, la fuente no está lista para entrar en la TOOL.
 - Verificar cada URL antes de incorporarla al código. Si devuelve 404, está obsoleta o redirige a una página genérica, localizar la página oficial equivalente y reemplazarla. No presentar una bibliografía con enlaces rotos.
 
 ### Resultado mínimo de la sugerencia
@@ -155,6 +173,8 @@ No copiar rankings ni narrativas de otros informes. Las veinte propuestas deben 
      1. ¿Esto es útil para el usuario?
      2. ¿Esto responde a la intención de búsqueda?
      3. ¿Puedo aportar mayor utilidad al usuario final?
+   - **Mínimo editorial SEO antes de solicitar `okQA`:** el contenido no se considera terminado por cumplir tipos, schemas o longitud técnica. Debe incluir al menos cuatro bloques temáticos con títulos, tres párrafos explicativos, una lista accionable y un tip de límites o evidencia. En conjunto debe explicar el problema que resuelve, cuándo usar la TOOL, cómo interpretar la salida, qué hacer después y qué no puede afirmar. FAQ y HowTo deben añadir respuestas o pasos útiles, no repetir el texto principal con otras palabras.
+   - Revisar cada bloque preguntando qué decisión nueva permite tomar al lector. Eliminar frases de relleno, promesas genéricas y descripciones del widget que no aporten conocimiento de investigación.
    - No responder con afirmaciones complacientes. Señalar carencias concretas, corregirlas y repetir la revisión antes de solicitar `okQA`.
 
 ### Fase 2: Desarrollo e Implementación (English-First)
@@ -168,7 +188,7 @@ No copiar rankings ni narrativas de otros informes. Las veinte propuestas deben 
    - `controller.ts`: Gestión de eventos, sliders síncronos, custom selects y chips de presets.
    - `<english-slug>.css`: Estilos Vanilla CSS estructurados con tokens `--n-*`; el nombre debe coincidir exactamente con el `slug` de `en.ts` para que el preview lo cargue.
    - `component.astro`: Vista de la herramienta pre-renderizada en SSR con hidratación limpia vía `<script is:inline type="application/json">`.
-   - `bibliography.ts` & `bibliography.astro`: Citas bibliográficas autoritativas.
+   - `bibliography.ts` & `bibliography.astro`: Citas bibliográficas autoritativas, internacionales y variadas, cumpliendo obligatoriamente la fuente primaria no inglesa definida en esta skill.
    - `seo.astro`: Renderizado SEO resiliente con fallbacks.
    - `entry.ts` & `index.ts`: Registro formal exportando únicamente el loader de `en` durante la Fase 2.
 2. **Registrar la Herramienta**:
@@ -198,7 +218,7 @@ Antes de hacer commit, `npm run minor` o publicar una TOOL, validar la integraci
 1. Leer sus layouts/rutas de librería y comprobar la firma efectiva de `Component`, `SEOComponent` y `BibliographyComponent`; no inferir el contrato solo desde los tipos de la librería.
 2. Ejecutar una prueba de prerender de al menos una ruta de la TOOL en cada consumidor y en un locale no español. Para `SEOComponent`, el contrato estándar del ecosistema es recibir `{ locale }`, cargar `entry.i18n[locale]` y pasar `{ locale, sections: content.seo }` a `SEORenderer`; no declarar `{ content }` salvo que ambos consumidores lo pasen explícitamente.
 3. Añadir o actualizar una regresión en la librería que cubra este contrato de loader/render, y volver a ejecutar tests y build después del cambio.
-4. Tras el `minor` y la publicación, instalar la versión exacta en ambos consumidores mediante sus scripts oficiales, confirmar que `package.json`, lockfile y `node_modules` resuelven esa misma versión, y repetir el smoke build. No cerrar la tarea con la librería corregida pero los consumidores todavía apuntando a la versión rota.
+4. Tras el `minor` y la publicación, instalar la versión exacta en ambos consumidores mediante sus scripts oficiales, confirmar que `package.json`, lockfile y `node_modules` resuelven esa misma versión y validar la integración mínima del runtime/adaptador. En `jjlmoya` y `website` no ejecutar builds ni tests de consumidor: no son necesarios para completar la TOOL. No cerrar la tarea con la librería corregida pero los consumidores todavía apuntando a la versión rota.
 
 Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incompleta y documentar el bloqueo; nunca presentar solo el build aislado de la librería como integración validada.
 
@@ -220,7 +240,8 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
    - En `/d/code/jjlmoya`: `npm run update <categoria>`
    - En `/d/code/website`: `npm run update <categoria>`
 4. Generar la Imagen OpenGraph (OBLIGATORIAMENTE CUADRADA 1:1):
-   - Usar la capacidad de generación de imágenes disponible, con estilo *Artist Ink and Watercolor* y formato `1:1` (PROHIBIDO 16:9 u otros formatos).
+   - Usar la capacidad de generación de imágenes disponible, formato `1:1` (PROHIBIDO 16:9 u otros formatos) y referencias visuales reales de varias imágenes existentes en `public/images/utilities/`. No imponer *Artist Ink and Watercolor* ni otro preset: el prompt debe derivar el estilo común observado en esas referencias.
+   - En `/d/code/jjlmoya` generar únicamente `public/images/utilities/<slug-es>.webp`; no crear ni conservar allí `public/images/utilities/<slug-en>.webp`. En `/d/code/website` generar únicamente `public/images/utilities/<slug-en>.webp`.
    - Convertir a WebP en `/d/code/jjlmoya` usando el script oficial del repositorio (PROHIBIDO crear scripts personalizados):
      ```bash
      cd /d/code/jjlmoya
@@ -314,21 +335,42 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 
 13. **Auto-Refinamiento**:
     - Si el usuario detecta cualquier discrepancia o aspecto a mejorar, actualizar inmediatamente este documento antes de proseguir.
+    - Si el usuario detecta que una TOOL de análisis tabular parece una hoja de cálculo encogida, con tipografía microscópica, columnas de diagnóstico que vacían la escena o controles nativos sin integración visual, detener el gate: convertir el resultado en una composición de señales legible a primer vistazo, dar prioridad a una muestra interpretable de la estructura y usar la tabla completa solo como detalle desplazable.
+    - Si el resultado vuelve a presentarse como cuatro o más tarjetas separadas, detener el gate aunque las tarjetas sean grandes: sustituirlas por una composición continua con divisores internos, porque una cuadrícula de cards no puede ser la metáfora principal de una TOOL de análisis.
+    - Si el usuario detecta que el título o el slug de una TOOL son vagos y no expresan la tarea concreta, detener el gate editorial: definir una frase longtail basada en la entrada, los problemas detectados y la decisión que ayuda a tomar, y mantener esa frase alineada en el registro, la ruta, los metadatos, el CSS y las referencias internas.
+    - Una frase longtail no puede resolver la vaguedad introduciendo un encabezado imposible de leer: comprobar el ancho real del `h1` del consumidor y compactar la frase manteniendo formato, problema y acción cuando el título se desborde.
+    - En la herramienta de planificación de filtros de acuario, el usuario rechaza el naturalismo realista y también la estética serigráfica/cut-paper: la imagen OpenGraph debe seguir el lenguaje Artist Ink de las demás herramientas, con dibujo editorial de tinta visible, formas gestuales y una metáfora simplificada del tanque y su corriente.
+    - Una TOOL que solo recoge notas y las devuelve como una reformulación genérica no supera el gate de utilidad: debe comprobar, calcular, comparar o producir una decisión/acción verificable. Si no lo hace, hay que pivotar antes de localizarla o publicarla.
+    - En el discovery del 30 de agosto de 2026, el usuario rechazo explicitamente las propuestas 10, 12, 15, 16 y 19. No volver a proponerlas ni crear issues para ellas en este ciclo.
+    - Cuando el usuario pida oportunidades para "las tools más vacías", limitar el discovery a repositorios/verticales públicas existentes ordenados por su número real de directorios inmediatos `src/tool`; no introducir una vertical nueva ni sustituir este criterio por volumen de demanda.
+    - La categoría `games` queda reservada a utilidades para juegos comerciales y sus decisiones de uso, compra, configuración o planificación dentro del juego; no proponer herramientas genéricas de hardware, mandos o periféricos bajo esta categoría.
+    - Los selectores de render de resultados deben ser exclusivos de la salida que actualizan y no coincidir con controles homónimos; toda cifra dinámica debe verificarse en el navegador contra la misma entrada que alimenta el resumen. Los decimales visibles deben respetar el locale objetivo sin delegar su forma final a la localización nativa de un input numérico.
     - Cuando una TOOL use tokens `--n-*`, aislar sus variables dentro de la card raíz de la propia TOOL además de declarar la paleta base, para evitar colisiones con tokens globales del proyecto consumidor. En modo oscuro, revisar también el contraste de etiquetas colocadas sobre ilustraciones o formas de color.
+    - Para validar consumidores, resolver siempre `../jjlmoya` y `../website` desde la ruta absoluta del repositorio propietario que se está publicando, y comprobar también el nivel padre del workspace activo antes de declarar que faltan. No confundir el `../` de `ai-knows` con el `../` de `jjlmoya-utils-*`.
     - Si el usuario detecta una interfaz clonada, un contenedor sobredimensionado o sombras exteriores exageradas, detener el gate visual y hacer tres pasadas explícitas: adelgazar el cromo, redefinir la metáfora visual desde el problema y revisar la jerarquía de contenido y SEO. No solicitar `okQA` hasta comprobar el render tras las tres pasadas.
     - Si los presets parecen botones flotantes o la herramienta se percibe como paneles desconectados, agruparlos dentro de una única card estructural con separadores internos y revisar el render antes de continuar.
     - Si el usuario detecta que onboarding, configuración y resultado aparecen como tres cards independientes, unirlos en una única superficie estructural con separadores internos claros y volver a revisar el render.
     - Nunca usar `window.alert`, `window.confirm` ni diálogos nativos equivalentes en una TOOL: sustituirlos por mensajes inline o una confirmación propia, animada, accesible y coherente con la identidad visual.
     - Cuando una vista Astro genere filas, opciones u otro HTML dinámico como cadena, insertar la cadena explícitamente con `set:html` o construir nodos tipados; nunca interpolarla como texto, porque el render puede mostrar las etiquetas HTML al usuario.
     - En cualquier TOOL de temperatura, mostrar el símbolo `°` junto a cada unidad y ofrecer un conmutador global visible entre `Metric °C` e `Imperial °F`; inputs, rangos, resultados, tablas, estado persistido y etiquetas deben cambiar sin alterar la temperatura física subyacente.
+    - Si el usuario detecta una temperatura expresada solo en Celsius o solo en Fahrenheit, detener la presentación y añadir el conmutador global `Metric °C` e `Imperial °F`; ningún rango, preset, resultado o etiqueta puede quedar en una sola unidad.
     - Si el usuario identifica un negro verdoso o lavado en el tema oscuro, redefinir la paleta hacia negros carbón reales y reservar los tonos verdes para reflejos o estados funcionales; volver a revisar contraste y render antes del gate visual.
     - En escenas SVG de hidratación de mascotas, no usar siluetas decorativas de perro o gato como protagonista: la metáfora debe centrarse en el recipiente y su nivel. El texto colocado sobre el agua debe usar un token de tinta específico del recipiente y verificarse en tema claro y oscuro.
+    - En la herramienta de tensión de cuerdas de guitarra, no usar una ilustración de mástil como obligación decorativa. La visualización debe explicar una decisión del usuario, por ejemplo comparando la tensión de las seis cuerdas con barras o bandas ancladas a sus datos; las cuerdas y líneas deben quedar contenidas si se usa una geometría de instrumento. Si la imagen no aporta interpretación, eliminarla.
+    - En la herramienta de tensión de cuerdas de guitarra, el primer viewport debe limitarse al preset de juego, la escala y la afinación. Los calibres individuales y la escala personalizada deben quedar plegados hasta que el usuario los solicite; el material base puede ser un supuesto visible del modelo en vez de otro selector inicial.
+    - En el asignador de presupuesto participativo, la escena de capacidad debe reconstruirse exclusivamente desde la selección actual y representar el sobrante con un ancho proporcional explícito; una sola propuesta financiada no puede conservar divisores de un estado anterior. Las exclusiones deben distinguir el exceso sobre el presupuesto restante de una derrota por desempate, y los costes superiores al tope deben recibir feedback inline antes del cálculo.
     - El tono de fondo no es un valor fijo del ecosistema: cada TOOL puede elegir fondos distintos para su identidad, y el tema claro y oscuro pueden usar superficies de base diferentes entre sí. Revisar siempre la relación entre fondo, card, escena y resultado; no repetir automáticamente el mismo fondo de otra TOOL.
     - Si una captura muestra una calculadora como dashboard oscuro genérico, una metáfora que solo adorna el formulario, una cifra principal que rompe sus unidades, o un badge que no coincide con el preset activo, detener la presentación y rehacer composición, tipografía, formato de cifras y estados antes de continuar.
+    - Si el usuario detecta que una TOOL no tiene una card estructural visible y que controles, resultado o leyenda parecen elementos flotantes, detener la presentación aunque existan bordes o sombras en el código: corregir los tokens de tema, crear una superficie contenedora legible, agrupar la escena y sus métricas dentro de una jerarquía única, y volver a capturar el render en tema claro y oscuro antes de continuar.
+    - En el perfil de habilidades CEFR, el formulario no puede ser la única escena: las cinco rutas de habilidad deben ser visibles desde el estado inicial o aparecer como una composición de atlas al calcular; los controles deben usar un indicador de selección dibujado y el estado vacío debe explicar visualmente qué aparecerá sin convertirse en una tarjeta vacía.
+    - En herramientas financieras, evitar paletas de verde oliva, marrón terroso o terracota apagada como lenguaje dominante: la dirección debe partir de una lectura financiera clara, como azul noche, marfil, oro o esmeralda funcional, con contraste verificable y sin convertir el resultado en una superficie embarrada.
+    - En calculadoras de volumen de acuarios, mostrar únicamente los campos de la geometría activa, separar volumen bruto, desplazamiento y volumen útil, y hacer que la escena visual comunique el nivel calculado en vez de funcionar como decoración.
     - Si una escena de resultados queda mucho más corta que la columna de interpretación y deja un hueco vacío, reordenar las métricas relacionadas junto a la escena o convertir la composición en una superficie equilibrada; no resolverlo con espacio en blanco artificial ni con una tarjeta estirada sin contenido.
     - Verificar que la etiqueta `repo:jjlmoya-utils-*` coincide con la categoría funcional de la oportunidad; si no coincide, corregir la etiqueta y la referencia de repositorio de la issue antes de seleccionar la implementación.
     - Si el usuario rechaza el tono verde de una TOOL de mapas, no insistir en verdes como fondo dominante ni resolver el problema con cambios cosméticos: redefinir la paleta desde papel, tinta, terracota, agua y tierras legibles, y eliminar los puntos decorativos sin significado.
     - Si el usuario detecta que el gráfico principal comunica poco, hacer que la escena visual pague su espacio: aumentar la densidad de señales interpretables, marcar eventos que expliquen la divergencia y dar al resultado una jerarquía mayor. Eliminar bloques introductorios o leyendas explicativas que no aporten una decisión nueva, y retirar textos auxiliares pegados a controles cuando vuelvan la interacción agobiante; la explicación debe quedar en el resultado o en el contenido SEO.
+    - En herramientas estadísticas, una barra de proporciones o una tabla por sí sola no basta como escena principal: mostrar los valores individuales, las medias de grupo y la media global en una composición gráfica que permita ver la separación y el ruido antes de leer los cuadrados de suma.
+    - En la herramienta de presupuesto de páginas de índice de libros, una composición con formulario comprimido, resultado fuera del primer vistazo, controles cortados o una metáfora de hojas que no explica la decisión editorial se considera bloqueada. Rehacer la composición desde el problema: mostrar primero el presupuesto y la tensión entre páginas estimadas y páginas reservadas, agrupar los controles en un flujo respirable y hacer que cada marca visual corresponda a una decisión del editor.
     - En generadores de pueblos o asentamientos, los edificios deben leerse como un tejido urbano reconocible con casas, tejados, plazas, caminos y servicios; una nube de rectángulos conectados por puntos no supera el gate visual.
     - Las semillas de generadores de asentamientos deben ofrecer nombres de pueblo compuestos, variados y memorables, con suficientes combinaciones para evitar una lista corta repetitiva.
     - La edición de mapas de asentamientos debe ofrecer click derecho contextual sobre el mapa con herramientas y acciones visibles; el usuario no debe depender únicamente de seleccionar un modo global y después adivinar dónde clicar.
@@ -345,6 +387,7 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 14. **Separación estricta entre TOOL y widget**:
     - `title`, `description`, `slug`, FAQ, HowTo y SEO pertenecen a `ToolLocaleContent` y a los componentes de página. Nunca duplicar `title` o `description` dentro de `ui.ts`, `component.astro` o el widget interactivo.
     - El widget debe comenzar por el control funcional y sus resultados; el título y la descripción de la TOOL los renderiza la página consumidora.
+    - No añadir cabeceras introductorias, kickers, subtítulos ni bloques de onboarding antes de los controles del widget. La primera superficie visible de una TOOL debe empezar por la interacción o el resultado; la explicación necesaria debe vivir en las etiquetas de los controles, junto al resultado o en el contenido SEO. Esta regla no elimina los encabezados semánticos del contenido SEO fuera del widget.
 
 15. **Identidad artística y experiencia de museo usable**:
     - Cada TOOL debe sentirse como una pieza de museo interactiva: una identidad visual propia, una composición memorable, una respuesta clara a los inputs y un resultado que apetezca explorar.
@@ -358,7 +401,7 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 
 16. **Gate visual antes de QA**:
     - Revisar la captura o render de la herramienta antes de presentarla como lista para QA.
-    - Si aparecen títulos duplicados, descripciones dentro del widget, aspecto de Excel, arte genérico o el cromo de otra TOOL (rail de presets, ticket/sello, workshop, misma rejilla de chips y sliders), corregirlo antes de solicitar `okQA`.
+    - Si aparecen cabeceras introductorias dentro del widget, títulos duplicados, descripciones dentro del widget, aspecto de Excel, arte genérico o el cromo de otra TOOL (rail de presets, ticket/sello, workshop, misma rejilla de chips y sliders), corregirlo antes de solicitar `okQA`.
 
 19. **Prohibido clonar tools anteriores**:
     - Cada TOOL se inventa desde su problema, no desde la memoria de la última TOOL ni desde un hermano del repo.
@@ -378,12 +421,18 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 18. **Bibliografía breve, primaria y específica**:
     - Incluir pocas fuentes: por defecto 2 fuentes y solo ampliar a 3 si una decisión importante de la herramienta queda sin respaldo.
     - Cada fuente debe respaldar directamente una fórmula, rango, unidad, definición, procedimiento o afirmación concreta de esa TOOL. Preferir documentación primaria, organismos profesionales, universidades, fabricantes o publicaciones técnicas originales.
+    - Incluir obligatoriamente al menos una fuente primaria cuyo contenido original no esté en inglés. El título traducido, una versión localizada de una página inglesa o una cita secundaria no satisfacen este requisito.
+    - Para herramientas generales, cubrir al menos dos países o regiones y no concentrar toda la bibliografía en Estados Unidos ni en una sola institución. Si el alcance es jurisdiccional, la autoridad local manda para la norma y la fuente internacional/no inglesa debe respaldar solo el método o contexto que realmente cubra.
     - Priorizar la fuente oficial aunque esté publicada en un idioma distinto al locale de la TOOL. No sustituir una norma, organismo o documento oficial por una fuente secundaria solo para igualar el idioma de la interfaz.
     - Enlazar la página exacta que contiene la evidencia. Prohibidos como fuente bibliográfica las homepages, páginas de categoría, centros de recursos genéricos, resultados de búsqueda, listas de enlaces y artículos que solo traten el tema de forma tangencial.
     - No añadir fuentes para aparentar rigor ni repetir varias fuentes que sostengan la misma afirmación. La bibliografía debe ser corta, trazable y visible en la sección de referencias con nombre de la fuente, título específico y URL directa.
     - Antes de `okQA`, revisar cada enlace y anotar internamente qué parte concreta de la calculadora justifica. Si una fuente no permite justificar una decisión concreta, eliminarla o sustituirla.
+    - Antes de `okQA`, comprobar explícitamente una matriz mínima de idioma y procedencia: idioma original de cada fuente, país o región, institución, afirmación respaldada y URL verificada. Si falta la fuente primaria no inglesa o toda la bibliografía es anglófona/estadounidense sin excepción documentada, el gate queda bloqueado.
     - La bibliografía debe respaldar la ciencia, disciplina o procedimiento que el usuario estudia con la TOOL, no la tecnología usada para implementarla. En una herramienta científica, médica, acústica o técnica, citar investigaciones, normas y métodos del dominio; no citar Web APIs, frameworks, Canvas, Web Audio, lenguajes ni documentación de plataforma salvo que la propia TOOL enseñe específicamente ese estándar web.
     - En testers de cámara, audio o comunicación, citar guías y estudios sobre iluminación, encuadre, legibilidad visual, calidad perceptual o preparación de videollamadas. Las especificaciones de `getUserMedia`, WebRTC, Canvas o callbacks de frames son documentación interna de implementación y no pertenecen a la bibliografía visible.
+    - En previews de logos, iconos o interfaces de sistemas operativos, una escena abstracta o un mockup ornamental no supera el gate: la TOOL debe reproducir una superficie de uso reconocible del sistema objetivo y acompañarla de una auditoría accionable. Como mínimo, debe medir el archivo cargado, la proporción, la resolución y el margen de seguridad frente a recortes o máscaras, distinguir heurísticas propias de garantías de plataforma y mostrar claramente qué requiere revisión.
+    - En previews de sistemas operativos, cada apariencia o máscara ofrecida debe producir una diferencia visual observable en la escena, no solo cambiar `aria-pressed` o un atributo sin reglas de render. Los wallpapers, barras del sistema, iconos auxiliares y capas temáticas deben ser reconocibles como el sistema objetivo; un gradiente abstracto o un `filter: grayscale()` no demuestra fidelidad a iOS o a una capa monocroma Android.
+    - Cuando el usuario aporte un catálogo propio de aplicaciones o assets, el preview debe usar ese catálogo en lugar de iconos genéricos o marcas de terceros. Una máscara o tratamiento elegido debe aplicarse de forma consistente a todos los iconos afectados de la escena, incluidos apps auxiliares, dock, icono auditado y estados temáticos; cambiar solo una pieza invalida la auditoría visual.
 
 20. **Alcance geográfico y slugs long tail cuando la oportunidad es local**:
     - Si la normativa, los datos o la intención pertenecen a un país concreto, limitar la TOOL explícitamente a ese país y no añadir selectores de país ni aproximaciones de otros regímenes que compliquen o debiliten el resultado.
@@ -438,6 +487,7 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
 
 29. **Carga de estilos verificada por slug inglés**:
     - El CSS de la TOOL debe llamarse exactamente como el `slug` declarado en `en.ts`: `src/tool/<tool-id>/<english-slug>.css`. El preview resuelve los estilos por ese slug, que puede ser una long tail distinta del `entry.id`.
+    - Si el archivo CSS añade un prefijo, sufijo o variante al slug inglés, la TOOL queda bloqueada aunque el texto sea visualmente parecido: renombrar el archivo para que ambos valores coincidan carácter por carácter y verificar la inyección de la regla principal en la ruta compilada.
     - Antes del gate visual, comprobar en la ruta compilada que las reglas de clase específicas de la TOOL están cargadas. Una página con controles nativos sin estilizar, SVG negro o layout lineal bloquea inmediatamente `okQA`, aunque type-check, lint, tests y build pasen.
 
 30. **Leyendas, badges y geometría deben pagar su significado**:
@@ -456,3 +506,17 @@ Si la instalación o el prerender no puede ejecutarse, dejar la tarea como incom
     - El texto SEO no puede ser una extensión genérica de la interfaz ni repetir etiquetas, advertencias o fórmulas sin enseñar una decisión del dominio. Cada bloque debe aportar contexto, interpretación, límites o una acción concreta que el usuario pueda aplicar.
     - Si el usuario considera pobre el SEO de una TOOL, ampliar el contenido con conocimiento del dominio que prepare una decisión: explicar el mecanismo, mostrar un ejemplo numérico, interpretar las señales, aclarar límites y proponer una forma de actuar. No rellenar con resúmenes de controles ni repetir la interfaz.
     - En utilidades simples de uso inmediato, como relojes, contadores o conversores directos, no añadir sellos de privacidad, avisos de funcionamiento local ni mensajes de marketing dentro del widget si no cambian una decisión del usuario. Reservar esas explicaciones para SEO, FAQ o notas de límites cuando aporten contexto funcional, legal o de seguridad.
+
+34. **SEO editorial de herramientas de preview y auditoría**:
+    - El título y la descripción deben nombrar el trabajo que resuelve la TOOL, no limitarse a describir una demo o una preview genérica.
+    - El contenido SEO debe responder qué introduce el usuario, qué inspecciona, qué resultado obtiene y qué límites tiene la validación.
+    - Cuando la TOOL muestra varios contextos simultáneamente, describirlos como una vista conjunta para obtener información; no usar lenguaje de versus, competición o comparativa salvo que esa sea la intención real.
+
+35. **QA del referendum threshold calculator**:
+    - El selector de denominador del approval quorum debe poder usar también el electorado cuando el usuario evalúa una regla de aprobación expresada como porcentaje de personas registradas; no limitarlo a all ballots o valid votes.
+    - Ofrecer presets visibles para mayoría simple, mayoría absoluta del electorado y mayorías cualificadas frecuentes, manteniendo siempre editable el valor y mostrando qué denominador modifica cada preset.
+    - El resultado debe poder compartirse mediante una URL que reconstruya los recuentos y las dos reglas sin enviar datos a un servidor. La vista responsive debe apilar la escena, las métricas y los controles sin desbordamiento horizontal en anchos móviles.
+
+36. **Actualización reactiva del referendum threshold calculator**:
+    - La decisión debe recalcularse mientras el usuario cambia cualquier recuento, umbral, modo, comparación o denominador; no exigir un botón separado de evaluación.
+    - Las selecciones programáticas de presets y custom selects deben disparar la misma actualización, persistir el estado local y mantener el resultado sincronizado con los controles visibles.
