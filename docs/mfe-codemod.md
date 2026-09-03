@@ -126,6 +126,8 @@ Hay que comprobar además que `dist` contiene:
 - los sitemaps por idioma en `dist/_utilities/<idioma>/<vertical>/sitemap.xml`;
 - los OG en `dist/_utilities/<vertical>/images`;
 - query de versión en las URLs de CSS e imágenes;
+- caché de un año e `immutable` solo para CSS, imágenes y bundles versionados;
+- caché de una hora para cada sitemap, cuya URL es estable y debe actualizarse;
 - ningún enlace interno a las rutas antiguas de la librería o de `website`.
 
 El `sitemap-index.xml` de `website` referencia cada sitemap MFE junto al sitemap
