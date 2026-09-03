@@ -255,7 +255,7 @@ const referenceContracts = {
     '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
-  'src/layouts/ProductionPage.astro': ['getUtilityAssetPath("favicon.ico")'],
+  'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
 };
 
@@ -463,7 +463,7 @@ const targetContracts = {
     '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
-  'src/layouts/ProductionPage.astro': ['getUtilityAssetPath("favicon.ico")'],
+  'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/category-ui.ts': ['openTool:', 'relatedEyebrow:', 'moreToolsIn:', 'zoomControls:', 'breadcrumb:', 'es:', 'en:', 'zh:'],
 };
@@ -547,11 +547,11 @@ const addAsset = (destinationSlug, candidates) => {
   });
 };
 
-const addSharedAsset = (fileName) => {
+const addSharedAsset = (fileName, sourceFileName = fileName, sourceRoots = [assetSourceRoot, legacyAssetSourceRoot]) => {
   const destination = join(sharedAssetDestination, fileName);
   if (existsSync(destination)) return;
-  const source = [assetSourceRoot, legacyAssetSourceRoot]
-    .map((root) => join(root, 'public', fileName))
+  const source = sourceRoots
+    .map((root) => join(root, 'public', sourceFileName))
     .find((candidate) => existsSync(candidate));
   if (!source) {
     missingSharedAssets.push(fileName);
@@ -563,6 +563,9 @@ const addSharedAsset = (fileName) => {
 for (const fileName of ['favicon.ico', 'favicon-48.webp', 'apple-touch-icon-brand.webp']) {
   addSharedAsset(fileName);
 }
+addSharedAsset('favicon-jjlmoya.ico', 'favicon-brand.ico', [legacyAssetSourceRoot]);
+addSharedAsset('favicon-jjlmoya-32.webp', 'favicon-brand-32.webp', [legacyAssetSourceRoot]);
+addSharedAsset('apple-touch-icon-jjlmoya.webp', 'apple-touch-icon-brand.webp', [legacyAssetSourceRoot]);
 
 addAsset(categoryKey, [
   { root: assetSourceRoot, slug: categoryKey },
