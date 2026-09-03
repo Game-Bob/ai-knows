@@ -181,7 +181,12 @@ const transform = (content) => content
 const pageTransform = (relativePath, content) => {
   let transformed = transform(content);
   if (relativePath === '.github/workflows/ci.yml') {
-    transformed = transformed.replaceAll('master', defaultBranch);
+    transformed = transformed
+      .replaceAll('master', defaultBranch)
+      .replace(
+        'CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
+        'CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}',
+      );
   }
   if (relativePath === 'astro.config.mjs') {
     transformed = transformed.replace(
@@ -474,7 +479,7 @@ const targetContracts = {
   '.github/workflows/ci.yml': [
     'run: ./node_modules/.bin/wrangler deploy',
     'CLOUDFLARE_API_TOKEN:',
-    'CLOUDFLARE_ACCOUNT_ID:',
+    'CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}',
   ],
   'src/components/ProductionBreadcrumb.astro': ['breadcrumbLabel', 'aria-label={breadcrumbLabel}'],
   'src/components/ProductionStructuredData.astro': ['BreadcrumbList', 'WebApplication', 'FAQPage'],
@@ -643,12 +648,15 @@ for (const action of actions) {
   else writeFileSync(action.path, action.content);
 }
 
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npmCommand = process.platform === 'win32' ? (process.env.ComSpec ?? 'cmd.exe') : 'npm';
+const npmArgs = process.platform === 'win32'
+  ? ['/d', '/s', '/c', 'npm install --no-audit --no-fund']
+  : ['install', '--no-audit', '--no-fund'];
 try {
   // npm install is deliberately part of the codemod: it updates the lockfile,
   // installs the shared version selected by the migration, and runs postinstall
   // so the per-tool CSS assets exist before QA or build.
-  execFileSync(npmCommand, ['install', '--no-audit', '--no-fund'], {
+  execFileSync(npmCommand, npmArgs, {
     cwd: targetRoot,
     stdio: 'inherit',
   });
