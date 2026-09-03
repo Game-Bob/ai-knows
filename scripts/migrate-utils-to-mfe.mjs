@@ -255,6 +255,8 @@ const referenceContracts = {
     '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
+  'src/layouts/ProductionPage.astro': ['getUtilityAssetPath("favicon.ico")'],
+  'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
 };
 
 for (const [relativePath, markers] of Object.entries(referenceContracts)) {
@@ -461,6 +463,8 @@ const targetContracts = {
     '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
+  'src/layouts/ProductionPage.astro': ['getUtilityAssetPath("favicon.ico")'],
+  'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/category-ui.ts': ['openTool:', 'relatedEyebrow:', 'moreToolsIn:', 'zoomControls:', 'breadcrumb:', 'es:', 'en:', 'zh:'],
 };
 
@@ -522,7 +526,9 @@ for (const sourcePath of sourceFiles(join(targetRoot, 'src'))) {
 }
 
 const missingAssets = [];
+const missingSharedAssets = [];
 const assetDestination = join(targetRoot, 'public', '_utilities', categoryKey, 'images');
+const sharedAssetDestination = join(targetRoot, 'public', '_utilities', categoryKey);
 const addAsset = (destinationSlug, candidates) => {
   const destination = join(assetDestination, `${destinationSlug}.webp`);
   if (existsSync(destination)) return;
@@ -541,6 +547,23 @@ const addAsset = (destinationSlug, candidates) => {
   });
 };
 
+const addSharedAsset = (fileName) => {
+  const destination = join(sharedAssetDestination, fileName);
+  if (existsSync(destination)) return;
+  const source = [assetSourceRoot, legacyAssetSourceRoot]
+    .map((root) => join(root, 'public', fileName))
+    .find((candidate) => existsSync(candidate));
+  if (!source) {
+    missingSharedAssets.push(fileName);
+    return;
+  }
+  actions.push({ type: 'copy', source, path: destination });
+};
+
+for (const fileName of ['favicon.ico', 'favicon-48.webp', 'apple-touch-icon-brand.webp']) {
+  addSharedAsset(fileName);
+}
+
 addAsset(categoryKey, [
   { root: assetSourceRoot, slug: categoryKey },
   { root: legacyAssetSourceRoot, slug: spanishCategorySlug },
@@ -554,6 +577,10 @@ for (const { english, spanish } of toolSlugPairs) {
 
 if (missingAssets.length > 0 && !allowMissingAssets) {
   fail(`missing source OG assets: ${missingAssets.join(', ')}; rerun with --allow-missing-assets only if these are intentionally deferred`);
+  process.exit();
+}
+if (missingSharedAssets.length > 0) {
+  fail(`missing shared identity assets: ${missingSharedAssets.join(', ')}`);
   process.exit();
 }
 
