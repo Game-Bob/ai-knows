@@ -570,7 +570,7 @@ const addAsset = (destinationSlug, candidates) => {
   if (existsSync(destination)) return;
   const source = candidates
     .filter(({ slug }) => Boolean(slug))
-    .map(({ root, slug }) => join(root, 'public', 'images', 'utilities', `${slug}.webp`))
+    .map(({ root, slug, directory = '' }) => join(root, 'public', 'images', 'utilities', directory, `${slug}.webp`))
     .find((candidate) => existsSync(candidate));
   if (!source) {
     missingAssets.push(destinationSlug);
@@ -606,6 +606,7 @@ addSharedAsset('apple-touch-icon-jjlmoya.webp', 'apple-touch-icon-brand.webp', [
 addAsset(categoryKey, [
   { root: assetSourceRoot, slug: categoryKey },
   { root: legacyAssetSourceRoot, slug: spanishCategorySlug },
+  { root: legacyAssetSourceRoot, slug: spanishCategorySlug, directory: 'category' },
 ]);
 for (const { english, spanish } of toolSlugPairs) {
   addAsset(english, [
