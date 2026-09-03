@@ -251,6 +251,8 @@ const referenceContracts = {
   'src/layouts/ProductionUtilityPage.astro': [
     'const isWidget = new URLSearchParams(window.location.search).get("widget") === "true";',
     '{ui.openTool}',
+    '{ui.relatedEyebrow}',
+    '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
 };
@@ -450,13 +452,16 @@ const targetContracts = {
     'CLOUDFLARE_API_TOKEN:',
     'CLOUDFLARE_ACCOUNT_ID:',
   ],
+  'src/components/ProductionBreadcrumb.astro': ['breadcrumbLabel', 'aria-label={breadcrumbLabel}'],
   'src/layouts/ProductionCategoryPage.astro': ['<ProductionBreadcrumb', '{ui.useTool}'],
   'src/layouts/ProductionUtilityPage.astro': [
     'const isWidget = new URLSearchParams(window.location.search).get("widget") === "true";',
     '{ui.openTool}',
+    '{ui.relatedEyebrow}',
+    '{ui.moreToolsIn}',
     'utility-widget-body',
   ],
-  'src/mfe/category-ui.ts': ['openTool:', 'es:', 'en:', 'zh:'],
+  'src/mfe/category-ui.ts': ['openTool:', 'relatedEyebrow:', 'moreToolsIn:', 'zoomControls:', 'breadcrumb:', 'es:', 'en:', 'zh:'],
 };
 
 for (const [relativePath, markers] of Object.entries(targetContracts)) {
