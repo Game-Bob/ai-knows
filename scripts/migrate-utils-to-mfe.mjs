@@ -273,6 +273,14 @@ for (const [relativePath, markers] of Object.entries(referenceContracts)) {
   }
 }
 
+const referenceWorkflow = read(join(referenceRoot, '.github/workflows/ci.yml'));
+const forbiddenWorkflowMarkers = ['website-build:', 'repository: Game-Bob/website', 'working-directory: website'];
+const coupledWorkflowMarkers = forbiddenWorkflowMarkers.filter((marker) => referenceWorkflow.includes(marker));
+if (coupledWorkflowMarkers.length > 0) {
+  fail(`reference CI must not depend on website: ${coupledWorkflowMarkers.join(', ')}`);
+  process.exit();
+}
+
 const filesToDelete = ['src/pages/[locale].astro', 'src/pages/[locale]/[slug].astro'];
 const plannedWrites = templateFiles.map((path) => join(targetRoot, path));
 const plannedDeletes = filesToDelete.map((path) => join(targetRoot, path));
