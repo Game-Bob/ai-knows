@@ -222,7 +222,8 @@ const pageTransform = (relativePath, content) => {
     'relatedTools?: { title: string; description: string; href: string }[];',
     'relatedTools?: { icon: string; title: string; description: string; href: string }[];',
   );
-  return transformed;
+  // Keep generated files canonical so every migration passes git diff --check.
+  return `${transformed.replace(/\n+$/g, '')}\n`;
 };
 
 const templateFiles = [
