@@ -209,6 +209,7 @@ const pageTransform = (relativePath, content) => {
 const templateFiles = [
   'astro.config.mjs',
   '.github/workflows/ci.yml',
+  'scripts/postbuild.mjs',
   'scripts/postinstall.mjs',
   'src/components/ProductionBreadcrumb.astro',
   'src/components/ProductionWidget.astro',
@@ -222,6 +223,7 @@ const templateFiles = [
   'src/mfe/assets.ts',
   'src/mfe/category-ui.ts',
   'src/mfe/routes.ts',
+  'src/pages/mfe-sitemaps/[locale]/[vertical]/sitemap.xml.ts',
   'src/pages/index.astro',
   'src/pages/utilidades/categorias/[category].astro',
   'src/pages/utilidades/[slug].astro',
@@ -291,6 +293,7 @@ const modernPackage = {
     predev: 'node scripts/postinstall.mjs',
     prestart: 'node scripts/postinstall.mjs',
     prebuild: 'node scripts/postinstall.mjs',
+    postbuild: 'node scripts/postbuild.mjs',
     qa: referencePackage.scripts.qa,
     'cf:dry-run': referencePackage.scripts['cf:dry-run'],
     'cf:preview': referencePackage.scripts['cf:preview'],
@@ -321,6 +324,11 @@ const routeEntries = [
       { pattern: `www.gamebob.dev/${locale}/${utilities}/${categories}/${slug}/*`, zone_name: 'gamebob.dev' },
     ];
   }),
+  { pattern: `www.jjlmoya.es/_utilities/es/${categoryKey}/sitemap.xml`, zone_name: 'jjlmoya.es' },
+  ...locales.map((locale) => ({
+    pattern: `www.gamebob.dev/_utilities/${locale}/${categoryKey}/sitemap.xml`,
+    zone_name: 'gamebob.dev',
+  })),
   { pattern: `www.gamebob.dev/_utilities/${categoryKey}/*`, zone_name: 'gamebob.dev' },
   { pattern: `www.jjlmoya.es/_utilities/${categoryKey}/*`, zone_name: 'jjlmoya.es' },
 ];

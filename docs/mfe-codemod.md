@@ -51,6 +51,9 @@ por defecto del repositorio (`main` o `master`). También:
 5. añade las dependencias y scripts de `utils-shared`, identity, tracking y Wrangler;
 6. elimina las rutas antiguas de preview que generarían páginas duplicadas;
 7. activa `resolveJsonModule` para versionar los assets con la versión del paquete.
+8. genera un sitemap XML por idioma en
+   `/_utilities/<idioma>/<vertical>/sitemap.xml`, con la categoría, sus tools y
+   alternates `hreflang`.
 
 Las rutas del worker también son específicas de cada vertical. Las páginas españolas
 planas se registran con su patrón exacto y con `/*` para cubrir el trailing slash;
@@ -120,9 +123,15 @@ Hay que comprobar además que `dist` contiene:
   tool declarada explícitamente como `english-first`;
 - los CSS en `dist/_utilities/<vertical>/styles`;
 - los bundles Astro en `dist/_utilities/<vertical>/` y sus `href` con ese prefijo;
+- los sitemaps por idioma en `dist/_utilities/<idioma>/<vertical>/sitemap.xml`;
 - los OG en `dist/_utilities/<vertical>/images`;
 - query de versión en las URLs de CSS e imágenes;
 - ningún enlace interno a las rutas antiguas de la librería o de `website`.
+
+El `sitemap-index.xml` de `website` referencia cada sitemap MFE junto al sitemap
+principal de su idioma. No se insertan elementos `<sitemap>` dentro de
+`sitemap-<idioma>.xml`, porque esos ficheros son `<urlset>` y dejarían de ser XML
+válido para buscadores.
 
 El commit de la migración debe separar los ficheros generados por el codemod de
 cambios de contenido que ya estuvieran pendientes en la vertical.
