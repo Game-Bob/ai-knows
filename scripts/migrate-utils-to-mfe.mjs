@@ -246,6 +246,29 @@ const templateFiles = [
   'public/_headers',
 ];
 
+const referenceContracts = {
+  '.github/workflows/ci.yml': ['run: ./node_modules/.bin/wrangler deploy'],
+  'src/layouts/ProductionUtilityPage.astro': [
+    'const isWidget = new URLSearchParams(window.location.search).get("widget") === "true";',
+    '{ui.openTool}',
+    'utility-widget-body',
+  ],
+};
+
+for (const [relativePath, markers] of Object.entries(referenceContracts)) {
+  const sourcePath = join(referenceRoot, relativePath);
+  if (!existsSync(sourcePath)) {
+    fail(`reference file is missing: ${relativePath}`);
+    process.exit();
+  }
+  const source = read(sourcePath);
+  const missingMarkers = markers.filter((marker) => !source.includes(marker));
+  if (missingMarkers.length > 0) {
+    fail(`reference contract is incomplete in ${relativePath}: ${missingMarkers.join(', ')}`);
+    process.exit();
+  }
+}
+
 const filesToDelete = ['src/pages/[locale].astro', 'src/pages/[locale]/[slug].astro'];
 const plannedWrites = templateFiles.map((path) => join(targetRoot, path));
 const plannedDeletes = filesToDelete.map((path) => join(targetRoot, path));
