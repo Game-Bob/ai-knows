@@ -129,9 +129,11 @@ Hay que comprobar además que `dist` contiene:
 - ningún enlace interno a las rutas antiguas de la librería o de `website`.
 
 El `sitemap-index.xml` de `website` referencia cada sitemap MFE junto al sitemap
-principal de su idioma. No se insertan elementos `<sitemap>` dentro de
-`sitemap-<idioma>.xml`, porque esos ficheros son `<urlset>` y dejarían de ser XML
-válido para buscadores.
+principal de su idioma. Las categorías ya migradas a MFE se mantienen en el
+registro de categorías para que `website` pueda pintar sus listados, pero se
+excluyen de su `SITEMAP_CATEGORIES` para evitar duplicar sus tools. No se
+insertan elementos `<sitemap>` dentro de `sitemap-<idioma>.xml`, porque esos
+ficheros son `<urlset>` y dejarían de ser XML válido para buscadores.
 
 El commit de la migración debe separar los ficheros generados por el codemod de
 cambios de contenido que ya estuvieran pendientes en la vertical.
