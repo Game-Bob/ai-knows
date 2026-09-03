@@ -247,6 +247,7 @@ const templateFiles = [
   'src/pages/[locale]/[utilities]/[categories]/[category]/[slug].astro',
   'src/pages/[locale]/[utilities]/[categories]/[category]/[slug]/manifest.json.ts',
   'src/tests/mfe_manifest.test.ts',
+  'src/tests/mfe_cache_contract.test.ts',
   'src/worker.ts',
   'public/_headers',
 ];
@@ -266,7 +267,9 @@ const referenceContracts = {
   'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/manifest.ts': ['createUtilityManifestResponse', 'application/manifest+json'],
+  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE'],
   'src/tests/mfe_manifest.test.ts': ['MFE utility manifest', 'application/manifest+json', '512x512', 'immutable'],
+  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE', 'manifest.json'],
 };
 
 for (const [relativePath, markers] of Object.entries(referenceContracts)) {
@@ -487,9 +490,11 @@ const targetContracts = {
   'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")', 'rel="manifest"'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/manifest.ts': ['createUtilityManifestResponse', 'application/manifest+json'],
+  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE'],
   'src/pages/utilidades/[slug]/manifest.json.ts': ['createUtilityManifestResponse', 'getStaticPaths'],
   'src/pages/[locale]/[utilities]/[categories]/[category]/[slug]/manifest.json.ts': ['createUtilityManifestResponse', 'getStaticPaths'],
   'src/tests/mfe_manifest.test.ts': ['MFE utility manifest', 'application/manifest+json', '512x512', 'immutable'],
+  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE', 'manifest.json'],
   'src/mfe/category-ui.ts': ['openTool:', 'relatedEyebrow:', 'moreToolsIn:', 'zoomControls:', 'breadcrumb:', 'es:', 'en:', 'zh:'],
 };
 
