@@ -44,11 +44,19 @@ por defecto del repositorio (`main` o `master`). También:
 1. usa `ALL_TOOLS` para que el listado incluya todas las tools registradas;
 2. conserva los slugs de cada idioma para construir canonical, alternates y enlaces;
 3. mantiene los assets en `public/_utilities/<vertical>/images`;
-4. genera los CSS de cada tool en `public/_utilities/<vertical>/styles` mediante
+4. configura Astro para emitir sus bundles hashed bajo
+   `public/_utilities/<vertical>/` y genera los CSS de cada tool en
+   `public/_utilities/<vertical>/styles` mediante
    `scripts/postinstall.mjs`;
 5. añade las dependencias y scripts de `utils-shared`, identity, tracking y Wrangler;
 6. elimina las rutas antiguas de preview que generarían páginas duplicadas;
 7. activa `resolveJsonModule` para versionar los assets con la versión del paquete.
+
+Las rutas del worker también son específicas de cada vertical. Las páginas españolas
+planas se registran con su patrón exacto y con `/*` para cubrir el trailing slash;
+los assets se sirven con `/_utilities/<vertical>/*`. No se debe reutilizar el
+comodín global `/_utilities/*`, porque pertenece a una sola vertical y provoca
+conflictos entre workers.
 
 ## Publicación a producción
 
@@ -111,6 +119,7 @@ Hay que comprobar además que `dist` contiene:
 - una página por tool y por idioma disponible, con fallback inglés solo para una
   tool declarada explícitamente como `english-first`;
 - los CSS en `dist/_utilities/<vertical>/styles`;
+- los bundles Astro en `dist/_utilities/<vertical>/` y sus `href` con ese prefijo;
 - los OG en `dist/_utilities/<vertical>/images`;
 - query de versión en las URLs de CSS e imágenes;
 - ningún enlace interno a las rutas antiguas de la librería o de `website`.

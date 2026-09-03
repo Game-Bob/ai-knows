@@ -182,6 +182,12 @@ const pageTransform = (relativePath, content) => {
   if (relativePath === '.github/workflows/ci.yml') {
     transformed = transformed.replaceAll('master', defaultBranch);
   }
+  if (relativePath === 'astro.config.mjs') {
+    transformed = transformed.replace(
+      'assets: "_utilities"',
+      `assets: "_utilities/${categoryKey}"`,
+    );
+  }
   if (relativePath === 'src/pages/index.astro') {
     transformed = transformed.replaceAll(
       '/utilidades/categorias/juegos-de-mesa/',
@@ -201,6 +207,7 @@ const pageTransform = (relativePath, content) => {
 };
 
 const templateFiles = [
+  'astro.config.mjs',
   '.github/workflows/ci.yml',
   'scripts/postinstall.mjs',
   'src/components/ProductionBreadcrumb.astro',
@@ -302,10 +309,10 @@ const routeEntries = [
     pattern: `www.jjlmoya.es/utilidades/categorias/${categorySlugs.es}/*`,
     zone_name: 'jjlmoya.es',
   },
-  ...spanishSlugs.map((slug) => ({
-    pattern: `www.jjlmoya.es/utilidades/${slug}`,
-    zone_name: 'jjlmoya.es',
-  })),
+  ...spanishSlugs.flatMap((slug) => [
+    { pattern: `www.jjlmoya.es/utilidades/${slug}`, zone_name: 'jjlmoya.es' },
+    { pattern: `www.jjlmoya.es/utilidades/${slug}/*`, zone_name: 'jjlmoya.es' },
+  ]),
   ...locales.flatMap((locale) => {
     const [utilities, categories] = routeSegments[locale];
     const slug = categorySlugs[locale];
@@ -314,8 +321,8 @@ const routeEntries = [
       { pattern: `www.gamebob.dev/${locale}/${utilities}/${categories}/${slug}/*`, zone_name: 'gamebob.dev' },
     ];
   }),
-  { pattern: 'www.gamebob.dev/_utilities/*', zone_name: 'gamebob.dev' },
-  { pattern: 'www.jjlmoya.es/_utilities/*', zone_name: 'jjlmoya.es' },
+  { pattern: `www.gamebob.dev/_utilities/${categoryKey}/*`, zone_name: 'gamebob.dev' },
+  { pattern: `www.jjlmoya.es/_utilities/${categoryKey}/*`, zone_name: 'jjlmoya.es' },
 ];
 
 const productionWrangler = {
