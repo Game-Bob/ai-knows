@@ -421,6 +421,7 @@ const stagingWrangler = {
 const actions = [];
 const addWrite = (path, content) => actions.push({ type: 'write', path, content });
 const addDelete = (path) => actions.push({ type: 'delete', path });
+const plannedTemplateContent = new Map();
 
 const sourceFiles = (directory, files = []) => {
   if (!existsSync(directory)) return files;
@@ -438,7 +439,33 @@ for (const relativePath of templateFiles) {
     fail(`reference file is missing: ${relativePath}`);
     process.exit();
   }
-  addWrite(join(targetRoot, relativePath), pageTransform(relativePath, read(source)));
+  const content = pageTransform(relativePath, read(source));
+  plannedTemplateContent.set(relativePath, content);
+  addWrite(join(targetRoot, relativePath), content);
+}
+
+const targetContracts = {
+  '.github/workflows/ci.yml': [
+    'run: ./node_modules/.bin/wrangler deploy',
+    'CLOUDFLARE_API_TOKEN:',
+    'CLOUDFLARE_ACCOUNT_ID:',
+  ],
+  'src/layouts/ProductionCategoryPage.astro': ['<ProductionBreadcrumb', '{ui.useTool}'],
+  'src/layouts/ProductionUtilityPage.astro': [
+    'const isWidget = new URLSearchParams(window.location.search).get("widget") === "true";',
+    '{ui.openTool}',
+    'utility-widget-body',
+  ],
+  'src/mfe/category-ui.ts': ['openTool:', 'es:', 'en:', 'zh:'],
+};
+
+for (const [relativePath, markers] of Object.entries(targetContracts)) {
+  const content = plannedTemplateContent.get(relativePath);
+  const missingMarkers = markers.filter((marker) => !content?.includes(marker));
+  if (missingMarkers.length > 0) {
+    fail(`generated target contract is incomplete in ${relativePath}: ${missingMarkers.join(', ')}`);
+    process.exit();
+  }
 }
 addWrite(civicTypesPath, modernTypes);
 addWrite(targetTsconfigPath, `${JSON.stringify(modernTsconfig, null, 4)}\n`);
