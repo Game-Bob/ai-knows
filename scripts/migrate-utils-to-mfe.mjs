@@ -86,6 +86,7 @@ const defaultBranch = (() => {
     return execFileSync('git', ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'], {
       cwd: targetRoot,
       encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
     }).trim().replace(/^origin\//, '');
   } catch {
     return execFileSync('git', ['branch', '--show-current'], {
@@ -627,6 +628,7 @@ if (allowDirty) console.warn('- WARNING target has local changes; they will be p
 
 if (dryRun) {
   for (const action of actions) console.log(`  ${actionLabel(action)}`);
+  console.log('  npm install (sync package-lock.json and node_modules, including postinstall)');
   process.exit();
 }
 
@@ -639,6 +641,20 @@ for (const action of actions) {
   mkdirSync(dirname(action.path), { recursive: true });
   if (action.type === 'copy') copyFileSync(action.source, action.path);
   else writeFileSync(action.path, action.content);
+}
+
+const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+try {
+  // npm install is deliberately part of the codemod: it updates the lockfile,
+  // installs the shared version selected by the migration, and runs postinstall
+  // so the per-tool CSS assets exist before QA or build.
+  execFileSync(npmCommand, ['install', '--no-audit', '--no-fund'], {
+    cwd: targetRoot,
+    stdio: 'inherit',
+  });
+} catch {
+  fail('npm install failed after updating package.json; package-lock.json and node_modules may be out of sync');
+  process.exit();
 }
 
 console.log(`Applied migration to ${targetRoot}`);
