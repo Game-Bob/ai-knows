@@ -31,7 +31,8 @@
         "tools:report": "node scripts/monthly-tools-report.mjs",
         "tools:server": "node --env-file=.env scripts/tools-server.mjs",
         "generate-workspace": "tsx scripts/generate-workspace.ts",
-        "verify": "npm run check && npm run lint && npm run test"
+        "verify": "npm run check && npm run lint && npm run test",
+        "mfe": "node scripts/mfe-report.mjs"
     },
     "engines": {
         "node": ">=22"
