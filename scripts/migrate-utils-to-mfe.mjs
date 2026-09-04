@@ -139,6 +139,18 @@ const englishSlugs = toolSlugPairs.map(({ english }) => english);
 const spanishSlugs = toolSlugPairs.map(({ english, spanish }) => spanish ?? english);
 const spanishCategorySlug = categorySlugFrom('es');
 
+const categoryPascalName = categoryKey
+  .split(/[^a-zA-Z0-9]+/)
+  .filter(Boolean)
+  .map((part) => part[0].toUpperCase() + part.slice(1))
+  .join('');
+const categoryIdentifier = categoryPascalName[0].toLowerCase() + categoryPascalName.slice(1);
+const categoryIndexPath = join(targetRoot, 'src', 'category', 'index.ts');
+const categoryExport = existsSync(categoryIndexPath)
+  ? read(categoryIndexPath).match(/export const (\w+Category)\b/)?.[1]
+  : undefined;
+const categoryVariable = categoryExport ?? `${categoryIdentifier}Category`;
+
 if (!spanishCategorySlug || englishSlugs.length === 0) {
   fail('could not discover the Spanish category slug and English tool slugs');
   process.exit();
@@ -175,7 +187,11 @@ if (missingCategoryLocales.length > 0) {
 
 const transform = (content) => content
   .replaceAll('\r\n', '\n')
-  .replaceAll('Tabletop', categoryKey[0].toUpperCase() + categoryKey.slice(1))
+  .replaceAll('Tabletop', categoryPascalName)
+  // Keep identifiers valid for multi-word verticals such as
+  // games-development and forensic-science while leaving URL slugs and CSS
+  // custom properties in their hyphenated form below.
+  .replaceAll('tabletopCategory', categoryVariable)
   .replaceAll('tabletop', categoryKey);
 
 const pageTransform = (relativePath, content) => {
@@ -302,11 +318,12 @@ const civicTypesPath = join(targetRoot, 'src', 'types.ts');
 // newer ones already import UtilityLocale. Normalize both forms before
 // applying the migration so the codemod does not depend on line endings.
 const civicTypes = read(civicTypesPath).replaceAll('\r\n', '\n');
+const sharedSeoImport = /import type \{ SEOSection(?: as SharedSEOSection)? \} from '@jjlmoya\/utils-shared';\n/;
 const modernTypes = civicTypes
   .replace(/import type \{ UtilityLocale \} from '@jjlmoya\/utils-shared\/routing';\n/g, '')
   .replace(
-    "import type { SEOSection } from '@jjlmoya/utils-shared';",
-    "import type { SEOSection } from '@jjlmoya/utils-shared';\nimport type { UtilityLocale } from '@jjlmoya/utils-shared/routing';",
+    sharedSeoImport,
+    (match) => `${match}import type { UtilityLocale } from '@jjlmoya/utils-shared/routing';\n`,
   ).replace(
   /export type KnownLocale =[\s\S]*?;\s*(?=export interface FAQItem)/,
   "export type KnownLocale = UtilityLocale;\n\n",
@@ -528,8 +545,24 @@ for (const sourcePath of sourceFiles(join(targetRoot, 'src'))) {
     : undefined;
   const lineBreak = source.includes('\r\n') ? '\r\n' : '\n';
   let transformedSource = source.replace(/supportedLangs: KnownLocale\[\]/g, 'supportedLangs: string[]');
+  if (normalizedPath === 'src/category/index.ts') {
+    const categoryCast = '  } as Partial<Record<KnownLocale, () => Promise<CategoryLocaleContent>>>,';
+    if (transformedSource.includes(categoryCast)) {
+      const missingCategoryLoaders = ['es', ...locales]
+        .filter((locale, index, all) => all.indexOf(locale) === index)
+        .filter((locale) => !new RegExp(`\\b${locale}:`).test(transformedSource))
+        .map((locale) => `    ${locale}: () => import('./i18n/${locale}').then((m) => m.content),`)
+        .join(lineBreak);
+      if (missingCategoryLoaders) {
+        transformedSource = transformedSource.replace(
+          categoryCast,
+          `${missingCategoryLoaders}${lineBreak}${categoryCast}`,
+        );
+      }
+    }
+  }
   if (/^src\/tool\/[^/]+\/index\.ts$/.test(normalizedPath)
-    && transformedSource.includes('ToolDefinition')
+    && /\bToolDefinition\b/.test(transformedSource)
     && !transformedSource.includes("import type { ToolDefinition } from '../../types';")) {
     transformedSource = `import type { ToolDefinition } from '../../types';${lineBreak}${transformedSource}`;
   }
@@ -632,6 +665,13 @@ addAsset(categoryKey, [
   { root: assetSourceRoot, slug: categoryKey },
   { root: legacyAssetSourceRoot, slug: spanishCategorySlug },
   { root: legacyAssetSourceRoot, slug: spanishCategorySlug, directory: 'category' },
+  // A few legacy verticals never had a dedicated category OG image. Reuse
+  // the first available localized tool image as a deterministic category
+  // fallback instead of producing a broken social preview.
+  ...toolSlugPairs.flatMap(({ english, spanish }) => [
+    { root: assetSourceRoot, slug: english },
+    { root: legacyAssetSourceRoot, slug: spanish },
+  ]),
 ]);
 for (const { english, spanish } of toolSlugPairs) {
   addAsset(english, [
