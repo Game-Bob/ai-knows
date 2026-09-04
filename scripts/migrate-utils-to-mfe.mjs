@@ -410,6 +410,13 @@ const routeEntries = [
   { pattern: `www.jjlmoya.es/_utilities/${categoryKey}/*`, zone_name: 'jjlmoya.es' },
 ];
 
+const nonAssetRoutes = routeEntries.filter(({ pattern }) => !pattern.includes('/_utilities/'));
+if (nonAssetRoutes.some(({ pattern }) => !pattern.endsWith('*'))
+  || nonAssetRoutes.some(({ pattern }) => pattern.endsWith('/*'))) {
+  fail('generated MFE routes must use one terminal wildcard per page/category path');
+  process.exit();
+}
+
 const productionWrangler = {
   $schema: './node_modules/wrangler/config-schema.json',
   name: `gamebob-utilities-${categoryKey}`,
