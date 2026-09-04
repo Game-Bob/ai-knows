@@ -40,7 +40,6 @@ const inspectRepository = (entry) => {
     wrangler: has(root, 'wrangler.jsonc'),
     mfeSource: has(root, 'src', 'mfe'),
     localizedPages: has(root, 'src', 'pages', '[locale]', '[utilities]'),
-    mfeSitemap: has(root, 'src', 'pages', 'mfe-sitemaps'),
     deployWorkflow: workflow.includes('wrangler deploy'),
     cloudflareAccountVariable: workflow.includes('secrets.CLOUDFLARE_ACCOUNT_ID'),
   };
