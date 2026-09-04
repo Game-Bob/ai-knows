@@ -552,7 +552,7 @@ for (const sourcePath of sourceFiles(join(targetRoot, 'src'))) {
     transformedSource = transformedSource.replaceAll(
       'content as Record<string, unknown>',
       'content as unknown as Record<string, unknown>',
-    );
+    ).replaceAll('\r\n', '\n');
   }
   if (normalizedPath === 'src/tests/seo_length.test.ts') {
     transformedSource = transformedSource.replace(
