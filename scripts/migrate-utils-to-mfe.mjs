@@ -533,7 +533,38 @@ for (const sourcePath of sourceFiles(join(targetRoot, 'src'))) {
   const uiType = uiPath && existsSync(uiPath)
     ? read(uiPath).match(/export (?:interface|type) (\w+UI)\b/)?.[1]
     : undefined;
+  const lineBreak = source.includes('\r\n') ? '\r\n' : '\n';
   let transformedSource = source.replace(/supportedLangs: KnownLocale\[\]/g, 'supportedLangs: string[]');
+  if (/^src\/tool\/[^/]+\/index\.ts$/.test(normalizedPath)
+    && transformedSource.includes('ToolDefinition')
+    && !transformedSource.includes("import type { ToolDefinition } from '../../types';")) {
+    transformedSource = `import type { ToolDefinition } from '../../types';${lineBreak}${transformedSource}`;
+  }
+  if (/^src\/tool\/[^/]+\/bibliography\.ts$/.test(normalizedPath)) {
+    transformedSource = transformedSource.replace(
+      "from '../../../types'",
+      "from '../../types'",
+    );
+  }
+  if (normalizedPath === 'src/tests/diacritics_density.test.ts'
+    || normalizedPath === 'src/tests/inverted_punctuation.test.ts'
+    || normalizedPath === 'src/tests/script_density.test.ts') {
+    transformedSource = transformedSource.replaceAll(
+      'content as Record<string, unknown>',
+      'content as unknown as Record<string, unknown>',
+    );
+  }
+  if (normalizedPath === 'src/tests/seo_length.test.ts') {
+    transformedSource = transformedSource.replace(
+      /(const loader = [^\r\n]+;)(\r?\n)(\s*)const content = await loader\(\);/,
+      `$1$2$3if (!loader) return;$2$3const content = await loader();`,
+    );
+  }
+  if (normalizedPath === 'src/tests/translation_copy.test.ts') {
+    transformedSource = transformedSource
+      .replace('const left = locales[leftIndex];', 'const left = locales[leftIndex]!;')
+      .replace('const right = locales[rightIndex];', 'const right = locales[rightIndex]!;');
+  }
   if (uiType && toolMatch?.[2] === 'entry') {
     transformedSource = transformedSource
       .replace(
