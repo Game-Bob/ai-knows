@@ -205,12 +205,6 @@ const pageTransform = (relativePath, content) => {
       .replaceAll('ALL_ENTRIES', 'ALL_TOOLS')
       .replaceAll('ALL_TOOLS.map(async (entry)', 'ALL_TOOLS.map(async ({ entry })');
   }
-  if (relativePath === 'src/pages/mfe-sitemaps/[locale]/[vertical]/sitemap.xml.ts') {
-    transformed = transformed.replace(
-      'ALL_ENTRIES[index - 1], alternateLocale',
-      'ALL_ENTRIES[index - 1]!, alternateLocale',
-    );
-  }
   // Some legacy components kept a wider locale union than the MFE supports.
   // The runtime check only needs string membership, so do not type that list
   // as the narrower UtilityLocale union.
@@ -229,7 +223,6 @@ const pageTransform = (relativePath, content) => {
 const templateFiles = [
   'astro.config.mjs',
   '.github/workflows/ci.yml',
-  'scripts/postbuild.mjs',
   'scripts/postinstall.mjs',
   'src/components/ProductionBreadcrumb.astro',
   'src/components/ProductionStructuredData.astro',
@@ -245,7 +238,6 @@ const templateFiles = [
   'src/mfe/assets.ts',
   'src/mfe/category-ui.ts',
   'src/mfe/routes.ts',
-  'src/pages/mfe-sitemaps/[locale]/[vertical]/sitemap.xml.ts',
   'src/pages/index.astro',
   'src/pages/utilidades/categorias/[category].astro',
   'src/pages/utilidades/[slug].astro',
@@ -274,9 +266,9 @@ const referenceContracts = {
   'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/manifest.ts': ['createUtilityManifestResponse', 'application/manifest+json'],
-  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE'],
+  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE'],
   'src/tests/mfe_manifest.test.ts': ['MFE utility manifest', 'application/manifest+json', '512x512', 'immutable'],
-  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE', 'manifest.json'],
+  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'manifest.json'],
 };
 
 for (const [relativePath, markers] of Object.entries(referenceContracts)) {
@@ -384,7 +376,6 @@ const modernPackage = {
     predev: 'node scripts/postinstall.mjs',
     prestart: 'node scripts/postinstall.mjs',
     prebuild: 'node scripts/postinstall.mjs',
-    postbuild: 'node scripts/postbuild.mjs',
     qa: referencePackage.scripts.qa,
     'cf:dry-run': referencePackage.scripts['cf:dry-run'],
     'cf:preview': referencePackage.scripts['cf:preview'],
@@ -415,11 +406,6 @@ const routeEntries = [
       zone_name: 'gamebob.dev',
     }];
   }),
-  { pattern: `www.jjlmoya.es/_utilities/es/${categoryKey}/sitemap.xml`, zone_name: 'jjlmoya.es' },
-  ...locales.map((locale) => ({
-    pattern: `www.gamebob.dev/_utilities/${locale}/${categoryKey}/sitemap.xml`,
-    zone_name: 'gamebob.dev',
-  })),
   { pattern: `www.gamebob.dev/_utilities/${categoryKey}/*`, zone_name: 'gamebob.dev' },
   { pattern: `www.jjlmoya.es/_utilities/${categoryKey}/*`, zone_name: 'jjlmoya.es' },
 ];
@@ -497,11 +483,11 @@ const targetContracts = {
   'src/layouts/ProductionPage.astro': ['getBrandAssetPath(brand, "favicon")', 'rel="manifest"'],
   'src/mfe/assets.ts': ['getUtilityAssetPath', 'UTILITY_ASSET_ROOT'],
   'src/mfe/manifest.ts': ['createUtilityManifestResponse', 'application/manifest+json'],
-  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE'],
+  'src/worker.ts': ['pathname.endsWith("/manifest.json")', 'LONG_LIVED_ASSET_CACHE'],
   'src/pages/utilidades/[slug]/manifest.json.ts': ['createUtilityManifestResponse', 'getStaticPaths'],
   'src/pages/[locale]/[utilities]/[categories]/[category]/[slug]/manifest.json.ts': ['createUtilityManifestResponse', 'getStaticPaths'],
   'src/tests/mfe_manifest.test.ts': ['MFE utility manifest', 'application/manifest+json', '512x512', 'immutable'],
-  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'SITEMAP_CACHE', 'manifest.json'],
+  'src/tests/mfe_cache_contract.test.ts': ['MFE cache contract', 'LONG_LIVED_ASSET_CACHE', 'manifest.json'],
   'src/mfe/category-ui.ts': ['openTool:', 'relatedEyebrow:', 'moreToolsIn:', 'zoomControls:', 'breadcrumb:', 'es:', 'en:', 'zh:'],
 };
 
