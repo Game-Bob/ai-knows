@@ -10,11 +10,12 @@ En el entorno `production` de cada repositorio hay que configurar:
 
 ```text
 Secret:   CLOUDFLARE_API_TOKEN  = token API de Cloudflare
-Variable: CLOUDFLARE_ACCOUNT_ID = e11602a44026a48c5bd08c710f813934
+Secret:   CLOUDFLARE_ACCOUNT_ID = e11602a44026a48c5bd08c710f813934
 ```
 
-El token se consume como `secrets.CLOUDFLARE_API_TOKEN` y el identificador de
-cuenta como `vars.CLOUDFLARE_ACCOUNT_ID`. El token nunca se guarda en el repo.
+El token y el identificador de cuenta se consumen como secretos mediante
+`secrets.CLOUDFLARE_API_TOKEN` y `secrets.CLOUDFLARE_ACCOUNT_ID`. Ninguno se
+guarda en el repo.
 
 ## Flujo obligatorio
 

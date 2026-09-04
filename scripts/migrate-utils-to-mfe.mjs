@@ -184,8 +184,8 @@ const pageTransform = (relativePath, content) => {
     transformed = transformed
       .replaceAll('master', defaultBranch)
       .replace(
-        'CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
         'CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}',
+        'CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
       );
   }
   if (relativePath === 'astro.config.mjs') {
@@ -480,7 +480,7 @@ const targetContracts = {
   '.github/workflows/ci.yml': [
     'run: ./node_modules/.bin/wrangler deploy',
     'CLOUDFLARE_API_TOKEN:',
-    'CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}',
+    'CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}',
   ],
   'src/components/ProductionBreadcrumb.astro': ['breadcrumbLabel', 'aria-label={breadcrumbLabel}'],
   'src/components/ProductionStructuredData.astro': ['BreadcrumbList', 'WebApplication', 'FAQPage'],

@@ -42,7 +42,7 @@ const inspectRepository = (entry) => {
     localizedPages: has(root, 'src', 'pages', '[locale]', '[utilities]'),
     mfeSitemap: has(root, 'src', 'pages', 'mfe-sitemaps'),
     deployWorkflow: workflow.includes('wrangler deploy'),
-    cloudflareAccountVariable: workflow.includes('vars.CLOUDFLARE_ACCOUNT_ID'),
+    cloudflareAccountVariable: workflow.includes('secrets.CLOUDFLARE_ACCOUNT_ID'),
   };
   const migrated = Object.values(contract).every(Boolean);
   const excluded = excludedNames.get(name)

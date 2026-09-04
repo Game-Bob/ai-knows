@@ -50,22 +50,22 @@ const failed = [];
 for (const repository of repositories) {
     const fullName = `${organization}/${repository}`;
     try {
-        const variables = JSON.parse(runGh([
-            "variable",
+        const secrets = JSON.parse(runGh([
+            "secret",
             "list",
             "--repo",
             fullName,
             "--json",
             "name",
         ]));
-        const exists = variables.some(({ name }) => name === variableName);
+        const exists = secrets.some(({ name }) => name === variableName);
         if (exists) {
             unchanged.push(repository);
             continue;
         }
         if (!dryRun) {
             runGh([
-                "variable",
+                "secret",
                 "set",
                 variableName,
                 "--repo",
