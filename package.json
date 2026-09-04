@@ -33,6 +33,7 @@
         "generate-workspace": "tsx scripts/generate-workspace.ts",
         "verify": "npm run check && npm run lint && npm run test",
         "mfe": "node scripts/mfe-report.mjs",
+        "mfe:widget-fixes": "node scripts/apply-mfe-widget-fixes.mjs",
         "mfe:remove-sitemaps": "node scripts/remove-mfe-sitemaps.mjs",
         "mfe:normalize-routes": "node scripts/normalize-mfe-routes.mjs"
     },
