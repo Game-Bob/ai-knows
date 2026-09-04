@@ -396,24 +396,24 @@ const modernPackage = {
 
 const routeEntries = [
   {
-    pattern: `www.jjlmoya.es/utilidades/categorias/${categorySlugs.es}`,
+    // A terminal wildcard matches the base path and every suffix (including
+    // query strings), so one route replaces the previous exact + /* pair.
+    // This matters because gamebob.dev is already close to Cloudflare's
+    // per-zone Workers Routes limit.
+    pattern: `www.jjlmoya.es/utilidades/categorias/${categorySlugs.es}*`,
     zone_name: 'jjlmoya.es',
   },
-  {
-    pattern: `www.jjlmoya.es/utilidades/categorias/${categorySlugs.es}/*`,
+  ...spanishSlugs.map((slug) => ({
+    pattern: `www.jjlmoya.es/utilidades/${slug}*`,
     zone_name: 'jjlmoya.es',
-  },
-  ...spanishSlugs.flatMap((slug) => [
-    { pattern: `www.jjlmoya.es/utilidades/${slug}`, zone_name: 'jjlmoya.es' },
-    { pattern: `www.jjlmoya.es/utilidades/${slug}/*`, zone_name: 'jjlmoya.es' },
-  ]),
+  })),
   ...locales.flatMap((locale) => {
     const [utilities, categories] = routeSegments[locale];
     const slug = categorySlugs[locale];
-    return [
-      { pattern: `www.gamebob.dev/${locale}/${utilities}/${categories}/${slug}`, zone_name: 'gamebob.dev' },
-      { pattern: `www.gamebob.dev/${locale}/${utilities}/${categories}/${slug}/*`, zone_name: 'gamebob.dev' },
-    ];
+    return [{
+      pattern: `www.gamebob.dev/${locale}/${utilities}/${categories}/${slug}*`,
+      zone_name: 'gamebob.dev',
+    }];
   }),
   { pattern: `www.jjlmoya.es/_utilities/es/${categoryKey}/sitemap.xml`, zone_name: 'jjlmoya.es' },
   ...locales.map((locale) => ({
