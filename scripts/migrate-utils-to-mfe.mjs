@@ -109,18 +109,41 @@ const englishSlugFrom = (toolDirectory) => {
   return read(path).match(/(?:const slug\s*=\s*|slug:\s*)['"]([^'"]+)['"]/)?.[1];
 };
 
-const spanishOrEnglishSlugFrom = (toolDirectory) => {
-  const spanishPath = join(targetRoot, 'src', 'tool', toolDirectory, 'i18n', 'es.ts');
-  if (existsSync(spanishPath)) {
-    return read(spanishPath).match(/(?:const slug\s*=\s*|slug:\s*)['"]([^'"]+)['"]/)?.[1];
-  }
-  return englishSlugFrom(toolDirectory);
+const sourceFilesUnder = (directory) => {
+  const files = [];
+  const visit = (currentDirectory) => {
+    for (const entry of readdirSync(currentDirectory, { withFileTypes: true })) {
+      const path = join(currentDirectory, entry.name);
+      if (entry.isDirectory()) visit(path);
+      else if (/\.(?:ts|astro|js|mjs)$/.test(entry.name)) files.push(path);
+    }
+  };
+  visit(directory);
+  return files;
 };
 
 const spanishSlugFrom = (toolDirectory) => {
-  const spanishPath = join(targetRoot, 'src', 'tool', toolDirectory, 'i18n', 'es.ts');
+  const toolRoot = join(targetRoot, 'src', 'tool', toolDirectory);
+  const spanishPath = join(toolRoot, 'i18n', 'es.ts');
   if (!existsSync(spanishPath)) return undefined;
-  return read(spanishPath).match(/(?:const slug\s*=\s*|slug:\s*)['"]([^'"]+)['"]/)?.[1];
+  const directSlug = read(spanishPath).match(/(?:const slug\s*=\s*|slug:\s*)['"]([^'"]+)['"]/)?.[1];
+  if (directSlug) return directSlug;
+
+  const extractors = [
+    /(?:const\s+)?es\s*:\s*\{[\s\S]{0,3000}?\bslug\s*:\s*['"]([^'"]+)['"]/m,
+    /(?:const\s+)?es\s*:\s*[^=;\n]+?=\s*\{[\s\S]{0,3000}?\bslug\s*:\s*['"]([^'"]+)['"]/m,
+    /(?:language|locale)\s*:\s*['"]es['"][\s\S]{0,2000}?\bslug\s*:\s*['"]([^'"]+)['"]/m,
+    /localizedSlugs[\s\S]{0,1000}?\bes\s*:\s*['"]([^'"]+)['"]/m,
+  ];
+
+  for (const path of sourceFilesUnder(toolRoot).filter((candidate) => candidate !== spanishPath)) {
+    const source = read(path);
+    for (const extractor of extractors) {
+      const slug = source.match(extractor)?.[1];
+      if (slug) return slug;
+    }
+  }
+  return undefined;
 };
 
 const toolDirectories = existsSync(join(targetRoot, 'src', 'tool'))
@@ -137,6 +160,9 @@ const toolSlugPairs = toolDirectories
   .filter(({ english }) => Boolean(english));
 const englishSlugs = toolSlugPairs.map(({ english }) => english);
 const spanishSlugs = toolSlugPairs.map(({ english, spanish }) => spanish ?? english);
+const unresolvedSpanishSlugs = toolSlugPairs
+  .filter(({ directory, spanish }) => existsSync(join(targetRoot, 'src', 'tool', directory, 'i18n', 'es.ts')) && !spanish)
+  .map(({ directory }) => directory);
 const spanishCategorySlug = categorySlugFrom('es');
 
 const categoryPascalName = categoryKey
@@ -153,6 +179,10 @@ const categoryVariable = categoryExport ?? `${categoryIdentifier}Category`;
 
 if (!spanishCategorySlug || englishSlugs.length === 0) {
   fail('could not discover the Spanish category slug and English tool slugs');
+  process.exit();
+}
+if (unresolvedSpanishSlugs.length > 0) {
+  fail(`could not discover Spanish tool slugs for: ${unresolvedSpanishSlugs.join(', ')}`);
   process.exit();
 }
 

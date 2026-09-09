@@ -51,6 +51,10 @@ Tras cualquier corrección, repetir la secuencia completa. No presentar la TOOL 
 
 ## Fase 5: publicación y sincronización
 
+### Excepción MFE-only
+
+Si el usuario indica explícitamente que la entrega debe quedarse en el MFE/librería, esa instrucción prevalece sobre los pasos de consumidores: no ejecutar `npm run update` en `jjlmoya` o `website`, no generar assets allí y no hacer commits ni pushes de consumidores. La entrega termina con la librería publicada y el asset solo si pertenece al propio MFE.
+
 Ejecutar las acciones en este orden, usando únicamente los scripts oficiales indicados por la skill de origen:
 
 1. Comprobar que la librería está en `main`, limpia y sincronizada con `origin/main`.
